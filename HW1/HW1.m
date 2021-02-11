@@ -1,3 +1,5 @@
+% ASE 389 Orbit Determination
+% HW 1
 % Junette Hsin 
 
 %% Problem 1 
@@ -33,20 +35,6 @@ duy = -mu*y / ( rnorm )^3;
 duz = -mu*z / ( rnorm )^3;
 
 %% Problem 4 
-
-% Develop the necessary code to numerically integrate the equations of motion using the position and
-% velocity from Problem 1 as the initial conditions. 
-
-% Compute the future position and velocity at 20-
-% second intervals for two full orbits. 
-
-% Plot the magnitude of the position, velocity, and acceleration
-% as a function of time for two full orbits and provide the figure. 
-
-% Compute the specific orbital angular
-% momentum vector for these two full orbits and plot that as well, as a function of time, as a 3D
-% scatter plot (h = R X V ). Assume that the motion is only due to the accelerations derived from
-% Eq(3)
 
 a = oe(1); 
 T   = abs(2 * pi * sqrt(a^3 / mu));        % period 
@@ -193,12 +181,4 @@ function save_pdf(h, name)
     print(h,name,'-dpdf','-r0')
     
 end 
-
-
-
-
-
-
-
-
 

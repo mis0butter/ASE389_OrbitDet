@@ -16,7 +16,7 @@
 \setlength\LTleft{0pt} 
 
 \lstset{language=Matlab,%
-	%basicstyle=\color{red},
+	basicstyle=\footnotesize,
 	breaklines=true,%
 	morekeywords={matlab2tikz},
 	keywordstyle=\color{blue},%
@@ -64,7 +64,7 @@ In this assignment, a tool was created to numerically propagate a circular orbit
 % -------------------------------- % 
 \subsection{Solution} 
 
-The algorithms to convert orbital elements to Cartesian and back were taken from Reference \cite{bate_astrodynamics}. Given the spacecraft position and velocity vectors from the problem statement, the Keplerian elements are: 
+The algorithms to convert orbital elements to Cartesian and back were taken from References \cite{bate_astrodynamics} and \cite{jah_mod3}. First, the specific angular momentum vector, $h$, and perpendicular node vector (to the plane of the orbit), $n$, were calculated. Inclination, eccentricity, and the rest of the orbital elements followed while checking for equatorial orbits, NaNs, and quadrants of angles. Given the spacecraft position and velocity vectors from the problem statement, the Keplerian elements are: 
 
 \begin{equation}
 \begin{aligned}
@@ -90,6 +90,33 @@ where $a$ is the semi-major axis, $e$ is the eccentricity, $i$ is the orbit incl
 % -------------------------------- % 
 \subsection{Solution} 
 
+The expression for position in the perifocal frame is the following: 
+
+\begin{equation}
+\underline{R} = r cos (\nu) \hat{P} + r sin (\nu) \hat{Q}
+\end{equation}
+
+where the scalar magnitude r can be determined from the polar equation of a conic: 
+
+\begin{equation}
+r = \dfrac{p}{1 + e cos(\nu)}
+\end{equation}
+
+where 
+
+\begin{equation}
+p = a ( 1 - e^2 ) = \dfrac{h^2}{\mu} 
+\end{equation}
+
+\underline{R} then needs to be transformed from the perifocal frame to the ECI frame, which can be done through a series of transformation matrices as outlined in References \cite{bate_astrodynamics} and \cite{jah_mod2}. The resulting position and velocity vectors returned are: 
+
+\begin{equation}
+\begin{aligned}
+r = &~ [ -2.416951611809028e+03, 2.416951611809029e+03, -6.904756183437363e+03 ] \\
+v = &~ [ -5.088570340542163, 5.088570340542164, -0.028767991782603 ]
+\end{aligned}
+\end{equation}
+
 
 
 % ================================================================ % 
@@ -113,6 +140,7 @@ The dot product of the vector \underline{R} with itself is equal to the square o
 
 \begin{equation}
 R = \underline{R} \cdot \underline{R} = x^2 + y^2 + z^2
+\label{eq:rdot_square}
 \end{equation}
 
 Given the gravity potential function $U = \mu/R$, the gradient of the gravity potential function $ \nabla U $ is:
@@ -171,14 +199,14 @@ Plug in $x = -2436.45$, $y = -2436.45$, $z = 6891.037$, and $\mu = 398600.5$ fro
 % -------------------------------- % 
 \subsection{Solution 2}
 
-The gravitational potential function is commonly simplified as $\nabla U = \mu/r$, where $r$ is the distance between two bodies \cite{bate_astrodynamics}. Therefore: 
+There may have been a typo with the gravitational potential function in the problem statement. The gravitational potential function is commonly simplified as $U = \mu/r$, where $r$ is the distance between two bodies \cite{bate_astrodynamics}: 
 
 \begin{equation}
 r = \sqrt{R} = \sqrt{\underline{R} \cdot \underline{R}} = ( \underline{R} \cdot \underline{R} )^{1/2} = ( x^2 + y^2 + z^2 )^{1/2}
 \label{eq:U_r}
 \end{equation}
 
-If we use Equation \ref{eq:U_r} to calculate the gradient for the potential function, then $\dfrac{\delta U}{\delta x} \hat{i}$ becomes: 
+If we use Equation \ref{eq:U_r} to calculate the gradient for the potential function instead of Equaton \ref{eq:rdot_square}, then $\dfrac{\delta U}{\delta x} \hat{i}$ becomes: 
 
 \begin{equation}
 \frac{\delta U}{\delta x} \hat{i} = 
@@ -257,7 +285,7 @@ The orbit was propagated by numerically integrating the equations of motion \ref
 	\label{fig:prob4_2bodeom}
 \end{figure}
 
-The magnitudes of the velocity and acceleration vary throughout the orbit, which indicates that the orbit is not circular. The position and velocity vectors were converted into orbital elements which are shown in \ref{fig:prob4_2bodoes}. All of the orbital elements with the exception of true anomaly remain essentially constant, revealing the predictable and Keplerian nature of the orbit. The eccentricity shows that the orbit is elliptical; an eccentricity of 0 forms a perfectly circular orbit and a 1 forms a parabolic escape orbit. 
+The magnitudes of the velocity and acceleration vary throughout the orbit, which indicates that the orbit is not circular. The position and velocity vectors were converted into orbital elements which are shown in \ref{fig:prob4_2bodoes}. All of the orbital elements with the exception of true anomaly remain essentially constant, revealing the predictable and Keplerian nature of the orbit. The eccentricity shows that the orbit is elliptical; an eccentricity of 0 forms a perfectly circular orbit, a 1 forms a parabolic escape orbit, and greater than 1 forms a hyperbolic orbit. 
 
 \begin{figure}[H]
 	\centering
@@ -299,7 +327,7 @@ The energy constant of motion is given in Reference \cite{bate_astrodynamics}:
 E = \dfrac{v^2}{2} - \dfrac{\mu}{r}
 \end{equation}
 
-in which the first term is the "kinetic energy per unit mass," or specific kinetic energy, and the last term is the specific potential energy.  The potential energy will always be negative due to The specific mechanical energy, E, is the sum of the specific kinetic and potential energy and remains constant along its orbit.
+in which the first term is the "kinetic energy per unit mass," or specific kinetic energy, and the last term is the specific potential energy.  The potential energy will always be negative due to setting the zero reference of potential energy at the center of a massive body and the work done when moving from one point in space to another against the force of gravity. The specific mechanical energy, E, is the sum of the specific kinetic and potential energy and remains constant along its orbit.
 
 
 %
@@ -339,6 +367,9 @@ in which the first term is the "kinetic energy per unit mass," or specific kinet
 
 \section{Conclusion} 
 
+Calculating orbital elements to and from Cartesian position and velocity vectors can be tricky because of the quadrant ambiguities when performing trigonometric computations. Problem 3 might have included a typo in its problem statement for the gravity potential function; the potential is commonly given as $U = \mu/r$ in which r is the distance between 2 bodies, not $U = \mu / ( \underline{R} \cdot \underline{R} )$. Solutions were given for both potential equations. Though position and velocity may vary along an orbit, there are constants of motion such as angular momentum and specific mechanical energy which govern the motion of celestial bodies. 
+
+
 
 % ================================================================ % 
 
@@ -349,62 +380,273 @@ HW1 MATLAB code:
 
 \begin{lstlisting}[basicstyle=\footnotesize]
 % ASE 389 Orbit Determination
-% HW 0
+% HW 1
 % Junette Hsin 
-
 
 %% Problem 1 
 
-t   = linspace( 0, 20, 101 ); 
-t   = 0 : 0.2 : 400; 
-A   = 1.34; 
-phi = pi/3; 
-km  = 1; 
+global mu 
 
-x   = A * cos( sqrt( km )*t + phi ); 
+mu = 398600.5 ; 
+r  = [ -2436.45; -2436.45; 6891.037 ]; 
+v  = [ 5.088611; 5.088611; 0 ]; 
 
-name = 'Problem 1: harmonic oscillator x(t)'; 
-figure('name', name); 
-plot(t, x); 
-ylabel('x(t)'); 
-xlabel('t'); 
-title(name); 
-set(gca, 'fontsize', 12); 
-
+rv = [r; v]; 
+oe = rv2oe(rv);  
 
 %% Problem 2 
 
-y0 = zeros(2,1); 
-y0(1) = A * cos(phi); 
-y0(2) = - A * sqrt( km ) * sin(phi); 
+rv = oe2rv(oe); 
 
-reltol = 1e-12; 
-abstol = 1e-20; 
-myoptions   = odeset( 'RelTol', reltol, 'AbsTol', abstol); 
-[t, y]      = ode45( @harmoscillator, t, y0, myoptions, km); 
+%% Problem 3 
 
-% numerical - analytical 
-error = y(:,1)' - x; 
+x = -2436.45; 
+y = -2436.45; 
+z = 6891.037; 
+mu = 398600.5; 
 
-name = 'Problem 2: x(t) error'; 
-figure('name', name); 
-plot(t, error); 
-xlabel('t')
-ylabel('numerical - analytical')
-title({name ;
-sprintf('RelTol = %.2e, AbsTol = %.2e ', reltol, abstol) }); 
-set(gca, 'fontsize', 12); 
+dux = -2*mu*x / ( x^2 + y^2 + z^2 )^2; 
+duy = -2*mu*y / ( x^2 + y^2 + z^2 )^2;
+duz = -2*mu*z / ( x^2 + y^2 + z^2 )^2;
 
+rnorm = sqrt( x^2 + y^2 + z^2 ); 
+
+dux = -mu*x / ( rnorm )^3; 
+duy = -mu*y / ( rnorm )^3; 
+duz = -mu*z / ( rnorm )^3;
+
+%% Problem 4 
+
+a = oe(1); 
+T   = abs(2 * pi * sqrt(a^3 / mu));        % period 
+
+toler   = 1e-8;         % 1e-14 accurate; 1e-6 coarse 
+options = odeset('reltol', toler, 'abstol', toler ); 
+[t,x] = ode45(@TwoBod_6states, [0 2*T], [r; v], options); 
+
+for i = 1:length(t)
+rnorm(i) = norm(x(i, 1:3)); 
+vnorm(i) = norm(x(i, 4:6)); 
+H(i, :) = cross(x(i, 1:3), x(i, 4:6)); 
+hnorm(i) = norm(H(i, :)); 
+end 
+
+anorm = 0; 
+for i = 2:length(t)
+a = (x(i, 4:6) - x(i-1, 4:6)) / ( t(i) - t(i-1) ); 
+anorm(i) = norm(a); 
+end 
+
+% ------------------------------------------------------------------------
+
+name = 'Problem 4: 2-Body EOM'; 
+h = figure('name', name); 
+
+% position 
+subplot(3,1,1)
+plot(t, rnorm); grid on 
+title('r norm') 
+ylabel('km')
+
+% velocity 
+subplot(3,1,2) 
+plot(t, vnorm); grid on 
+title('v norm') 
+ylabel('km/s')
+
+% acceleration 
+subplot(3,1,3) 
+plot(t, anorm); grid on 
+title('a norm'); 
+ylabel('km/s^2')
+xlabel('time (sec)') 
+
+sgtitle(name)
+
+save_pdf(h, 'prob4_2bodeom'); 
+
+% ------------------------------------------------------------------------
+
+name = 'Problem 4: 2-Body EOM Orbit'; 
+h = figure('name', name); 
+plot3(x(:,1), x(:,2), x(:,3)); hold on; grid on; 
+plot3(x(1,1), x(1,2), x(1,3), 'o')
+plot3(x(end,1), x(end,2), x(end,3), 'x') 
+xlabel('x (km)')
+ylabel('y (km)') 
+zlabel('z (km)') 
+legend('orbit', 'start', 'end')
+
+sgtitle(name) 
+
+save_pdf(h, 'prob4_2bodeom_orbit'); 
+
+% ------------------------------------------------------------------------
+
+clear oe 
+for i = 1:length(t)
+oe(i,:) = rv2oe(x(i,:)); 
+end 
+
+labels = {'a', 'e', 'i', '\omega', '\Omega', '\nu'}; 
+units = {'km', '', 'rad', 'rad', 'rad', 'rad'}; 
+name = 'Problem 4: 2-Body Orbital Elements'; 
+h = figure('name', name, 'position', [100 100 500 600]); 
+for i = 1:6
+subplot(6,1,i)
+plot(t, oe(:, i)); grid on 
+title(labels{i}); 
+ylabel(units{i}); 
+end 
+xlabel('time (sec)') 
+sgtitle(name)
+
+save_pdf(h, 'prob4_2bodoes'); 
+
+% ------------------------------------------------------------------------
+
+name = 'Problem 4: 2-Body Specific Angular Momentum'; 
+h = figure('name', name); 
+subplot(2,1,1) 
+scatter3(H(:,1), H(:,2), H(:,3)); grid on 
+xlabel('x (km^2/s)')
+ylabel('y (km^2/s)')
+zlabel('z (km^2/s)') 
+title('h (scatter plot)') 
+
+subplot(2,1,2) 
+plot(t, hnorm); grid on 
+xlabel('time (sec)') 
+ylabel('km^2/s') 
+title('h norm vs time')
+
+sgtitle(name) 
+
+save_pdf(h, 'prob4_angmom')
+
+%% Problem 5 
+
+% specific kinetic energy 
+for i = 1:length(t) 
+T(i) = 0.5 * vnorm(i)^2; 
+U(i) = mu / rnorm(i); 
+end 
+E = T - U; 
+
+name = 'Problem 4: 2-Body Specific Energy'; 
+h = figure('name', name); 
+subplot(2,1,1) 
+plot(t, E); grid on; hold on; 
+plot(t, T); 
+plot(t, U); 
+ylabel('km^2/s^2')
+legend('Total', 'Kinetic', 'Potential') 
+title('Total Specific Energy: Kinetic - Potential') 
+subplot(2,1,2) 
+plot(t, [0 diff(E)]); grid on 
+title('Change in Total Specific Energy') 
+xlabel('Time (sec)') 
+ylabel('km^2/s^2')
+sgtitle(name) 
+
+save_pdf(h, 'prob5_energy')
 
 %% subfunctions 
 
-function dx = harmoscillator( t, x, km )
+function save_pdf(h, name) 
 
-dx    = zeros(2, 1); 
-dx(1) = x(2); 
-dx(2) = -km * x(1); 
+% save as cropped pdf 
+set(h,'Units','Inches');
+pos = get(h,'Position');
+set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+print(h,name,'-dpdf','-r0')
 
 end 
+\end{lstlisting}
+
+rv2oe function: 
+
+\begin{lstlisting}[basicstyle=\footnotesize]
+function oe = rv2oe(rv)
+% ------------------------------------------------------------------------
+% Inputs 
+%   rv = [6x1] position and velocity states vector 
+% 
+% Outputs 
+%   oe = [6x1] orbital elements: a, e, i, w, Omega, nu
+%           a       = semimajor axis 
+%           e       = eccentricity 
+%           i       = inclination 
+%           w       = argument of perigee 
+%           Omega   = right ascension of ascending node 
+%           nu      = true anomaly 
+% ------------------------------------------------------------------------
+
+global mu 
+
+r = rv(1:3); 
+v = rv(4:6); 
+
+% angular momentum 
+h       = cross(r,v); 
+
+% node vector 
+nhat    = cross( [0 0 1], h ); 
+
+% eccentricity 
+evec    = ( (norm(v)^2 - mu/norm(r))*r - dot(r,v)*v ) / mu; 
+e       = norm(evec); 
+
+% specific mechanical energy 
+energy  = norm(v)^2/2 - mu/norm(r); 
+
+% semi-major axis and p
+if abs(e-1.0)>eps
+a = -mu/(2*energy); 
+p = a*(1-e^2); 
+else
+p = norm(h)^2/mu; 
+a = inf; 
+end
+
+% inclination 
+i = acos(h(3)/norm(h)); 
+
+% right ascension of ascending node (check for equatorial orbit) 
+if i > 0.000001
+Omega = acos( nhat(1)/norm(nhat) ); 
+else
+Omega = 0; 
+end
+if isnan(Omega)
+Omega = 0; 
+end
+if nhat(2)<0
+Omega = 2*pi - Omega; 
+end
+
+% argument of perigee 
+if e > 0.000001
+w = acos(dot(nhat,evec)/(norm(nhat)*e)); 
+else
+w = 0; 
+end
+if isnan(w)
+w = 0; 
+end
+% if e(3)<0
+%    argp = 360-argp
+% end
+
+% true anomaly 
+nu = acos( dot(evec,r) / (e*norm(r)) );  
+% if dot(r,v)<0
+%    nu = 360 - nu
+% end
+
+oe = [a; e; i; w; Omega; nu]; 
+
+end
 \end{lstlisting}
 
 
