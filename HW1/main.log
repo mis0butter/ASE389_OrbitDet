@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6500 64-bit) (preloaded format=pdflatex 2020.9.22)  11 FEB 2021 06:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6500 64-bit) (preloaded format=pdflatex 2020.9.22)  11 FEB 2021 06:33
 entering extended mode
 **./main.tex
 (main.tex
@@ -1779,107 +1779,107 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/bx/n' in size <12> not available
 (Font)              Font shape `T1/ntxtlf/b/n' tried instead on input line 51.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 12.0pt on input line 51.
-<prob_1.png, id=79, 831.70724pt x 244.21237pt>
+<prob_1.png, id=91, 831.70724pt x 244.21237pt>
 File: prob_1.png Graphic file (type png)
 <use prob_1.png>
-Package pdftex.def Info: prob_1.png  used on input line 62.
+Package pdftex.def Info: prob_1.png  used on input line 61.
 (pdftex.def)             Requested size: 422.77664pt x 124.14047pt.
-<prob_2.png, id=82, 826.58812pt x 58.11713pt>
+<prob_2.png, id=94, 826.58812pt x 58.11713pt>
 File: prob_2.png Graphic file (type png)
 <use prob_2.png>
-Package pdftex.def Info: prob_2.png  used on input line 88.
+Package pdftex.def Info: prob_2.png  used on input line 87.
 (pdftex.def)             Requested size: 422.77664pt x 29.72534pt.
  [1
 
 {C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map} <./prob_1.png>]
-<prob_3.png, id=101, 826.58812pt x 136.1085pt>
+<prob_3.png, id=113, 826.58812pt x 136.1085pt>
 File: prob_3.png Graphic file (type png)
 <use prob_3.png>
-Package pdftex.def Info: prob_3.png  used on input line 128.
+Package pdftex.def Info: prob_3.png  used on input line 127.
 (pdftex.def)             Requested size: 422.77664pt x 69.61586pt.
  [2 <./prob_2.png> <./prob_3.png>] [3]
-<prob_4.png, id=139, 827.19037pt x 182.78287pt>
+<prob_4.png, id=151, 827.19037pt x 182.78287pt>
 File: prob_4.png Graphic file (type png)
 <use prob_4.png>
-Package pdftex.def Info: prob_4.png  used on input line 264.
+Package pdftex.def Info: prob_4.png  used on input line 263.
 (pdftex.def)             Requested size: 422.77664pt x 93.41882pt.
-<prob4_2bodeom.pdf, id=142, 421.575pt x 316.18124pt>
+<prob4_2bodeom.pdf, id=154, 421.575pt x 316.18124pt>
 File: prob4_2bodeom.pdf Graphic file (type pdf)
 <use prob4_2bodeom.pdf>
-Package pdftex.def Info: prob4_2bodeom.pdf  used on input line 284.
+Package pdftex.def Info: prob4_2bodeom.pdf  used on input line 283.
 (pdftex.def)             Requested size: 421.57396pt x 316.18047pt.
  [4 <./prob_4.png>]
-<prob4_2bodoes.pdf, id=155, 376.40625pt x 451.6875pt>
+<prob4_2bodoes.pdf, id=167, 376.40625pt x 451.6875pt>
 File: prob4_2bodoes.pdf Graphic file (type pdf)
 <use prob4_2bodoes.pdf>
-Package pdftex.def Info: prob4_2bodoes.pdf  used on input line 293.
+Package pdftex.def Info: prob4_2bodoes.pdf  used on input line 292.
 (pdftex.def)             Requested size: 376.40532pt x 451.68639pt.
  [5 <./prob4_2bodeom.pdf>]
-<prob4_angmom.pdf, id=198, 421.575pt x 316.18124pt>
+<prob4_angmom.pdf, id=210, 421.575pt x 316.18124pt>
 File: prob4_angmom.pdf Graphic file (type pdf)
 <use prob4_angmom.pdf>
-Package pdftex.def Info: prob4_angmom.pdf  used on input line 302.
+Package pdftex.def Info: prob4_angmom.pdf  used on input line 301.
 (pdftex.def)             Requested size: 421.57396pt x 316.18047pt.
  [6 <./prob4_2bodoes.pdf>]
-<prob_5.png, id=270, 828.696pt x 107.2005pt>
+<prob_5.png, id=282, 828.696pt x 107.2005pt>
 File: prob_5.png Graphic file (type png)
 <use prob_5.png>
-Package pdftex.def Info: prob_5.png  used on input line 312.
+Package pdftex.def Info: prob_5.png  used on input line 311.
 (pdftex.def)             Requested size: 422.77664pt x 54.68951pt.
-<prob5_energy.pdf, id=271, 421.575pt x 316.18124pt>
+<prob5_energy.pdf, id=283, 421.575pt x 316.18124pt>
 File: prob5_energy.pdf Graphic file (type pdf)
 <use prob5_energy.pdf>
-Package pdftex.def Info: prob5_energy.pdf  used on input line 320.
+Package pdftex.def Info: prob5_energy.pdf  used on input line 319.
 (pdftex.def)             Requested size: 421.57396pt x 316.18047pt.
  [7 <./prob4_angmom.pdf> <./prob_5.png>] [8 <./prob5_energy.pdf>]
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 8.0pt on input line 382.
+(Font)              scaled to size 8.0pt on input line 381.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 5.0pt on input line 383.
-LaTeX Font Info:    Try loading font information for TS1+ntxtlf on input line 3
-96.
+(Font)              scaled to size 5.0pt on input line 382.
+LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
+(Font)              scaled to size 8.0pt on input line 391.
+LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
+(Font)              scaled to size 6.2pt on input line 391.
+LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
+(Font)              scaled to size 7.19995pt on input line 391.
+LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
+(Font)              scaled to size 5.57996pt on input line 391.
+LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
+(Font)              scaled to size 8.0pt on input line 391.
+LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
+(Font)              scaled to size 6.2pt on input line 391.
+LaTeX Font Info:    Try loading font information for TS1+ntxtlf on input line 4
+08.
 
 ("C:\Program Files\MiKTeX 2.9\tex\latex\newtx\ts1ntxtlf.fd"
 File: ts1ntxtlf.fd 2015/01/18 v1.0 fd file for TS1/ntxtlf
 )
 LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
-(Font)              scaled to size 8.0pt on input line 396.
-LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 8.0pt on input line 411.
-LaTeX Font Info:    Font shape `OT1/ntxtlf/m/n' will be
-(Font)              scaled to size 6.2pt on input line 411.
-LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 7.19995pt on input line 411.
-LaTeX Font Info:    Font shape `T1/qhv/m/n' will be
-(Font)              scaled to size 5.57996pt on input line 411.
-LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
-(Font)              scaled to size 8.0pt on input line 411.
-LaTeX Font Info:    Font shape `T1/ntxtt/m/n' will be
-(Font)              scaled to size 6.2pt on input line 411.
- [9] (main.bbl
+(Font)              scaled to size 8.0pt on input line 408.
+ [9] [10] [11]
+[12] [13] (main.bbl
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 9.0pt on input line 1.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
 (Font)              scaled to size 9.0pt on input line 12.
 )
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 447.
-
-[10]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 447.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 744.
+ [14]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 744.
  (main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 447.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 447.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 744.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 744.
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: ADF5AD0C0E9B7D6398B5A96FB8C9CD4A;1020.
+(rerunfilecheck)             Checksum: E5882CEFE3A6BD8DAED6FB4B74D0C11E;1216.
  ) 
 Here is how much of TeX's memory you used:
- 27162 strings out of 493303
- 484854 string characters out of 3138691
- 720969 words of memory out of 3000000
- 30166 multiletter control sequences out of 15000+200000
- 608629 words of font info for 143 fonts, out of 3000000 for 9000
+ 27587 strings out of 493303
+ 490445 string characters out of 3138691
+ 807011 words of memory out of 3000000
+ 30291 multiletter control sequences out of 15000+200000
+ 608715 words of font info for 144 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,7n,94p,10368b,1914s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 60i,7n,94p,10368b,2855s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/tex-gyre/q-ts1.enc}{C:/Program F
 iles/MiKTeX 2.9/fonts/enc/dvips/newtx/ntx-ot1-tlf.enc}{C:/Program Files/MiKTeX 
 2.9/fonts/enc/dvips/base/8r.enc}{C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/ne
@@ -1893,9 +1893,9 @@ t.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/newtx/txexs.pfb><C:/Progr
 am Files/MiKTeX 2.9/fonts/type1/public/txfonts/txmia.pfb><C:/Program Files/MiKT
 eX 2.9/fonts/type1/public/newtx/txsys.pfb><C:/Program Files/MiKTeX 2.9/fonts/ty
 pe1/urw/times/utmri8a.pfb>
-Output written on main.pdf (10 pages, 1074791 bytes).
+Output written on main.pdf (14 pages, 1129189 bytes).
 PDF statistics:
- 486 PDF objects out of 1000 (max. 8388607)
- 121 named destinations out of 1000 (max. 500000)
- 29382 words of extra memory for PDF output out of 29859 (max. 10000000)
+ 865 PDF objects out of 1000 (max. 8388607)
+ 419 named destinations out of 1000 (max. 500000)
+ 29406 words of extra memory for PDF output out of 29859 (max. 10000000)
 

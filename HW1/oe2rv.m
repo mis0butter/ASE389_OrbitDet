@@ -18,7 +18,7 @@ global mu
 a       = oe(1); 
 e       = oe(2); 
 i       = oe(3); 
-w   = oe(4); 
+w       = oe(4); 
 LAN     = oe(5); 
 % M0      = oe(6); 
 nu      = oe(6); 
@@ -34,14 +34,6 @@ p = a * ( 1 - e^2 );            % intermediate variable
 r = p / ( 1 + e*cos(nu) );      % r_magnitude, polar coordinates 
 
 % Perifocal position and velocity 
-% r_pf    = zeros(3,1);  
-% v_pf    = zeros(3,1); 
-% r_pf(3) = 0; 
-% v_pf(3) = 0; 
-% r_pf(1) = r * cos(nu); 
-% r_pf(2) = r * sin(nu); 
-% v_pf(1) = -sqrt(mu/p) * sin(nu); 
-% v_pf(2) = sqrt(mu/p) * (e + cos(nu)); 
 
 r_pf = [ r * cos(nu); r * sin(nu); 0 ]; 
 v_pf = [ -sqrt(mu/p) * sin(nu); sqrt(mu/p) * (e + cos(nu)); 0 ]; 
