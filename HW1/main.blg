@@ -1,0 +1,10 @@
+This is BibTeX, Version 0.99dThe top-level auxiliary file: main.aux
+The style file: new-aiaa.bst
+Database file #1: sample.bib
+Name 1 in "Donald D. Mueller, Jerry White, and Roger R. Bate" has a comma at the end for entry bate_astrodynamics
+while executing---line 1578 of file new-aiaa.bst
+Name 1 in "Donald D. Mueller, Jerry White, and Roger R. Bate" has a comma at the end for entry bate_astrodynamics
+while executing---line 1670 of file new-aiaa.bst
+Name 1 in "Donald D. Mueller, Jerry White, and Roger R. Bate" has a comma at the end for entry bate_astrodynamics
+while executing---line 1670 of file new-aiaa.bst
+(There were 3 error messages)
