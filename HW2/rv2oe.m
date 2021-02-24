@@ -1,16 +1,16 @@
 function oe = rv2oe(rv)
 % ------------------------------------------------------------------------
 % Inputs 
-%   rv = [6x1] position and velocity states vector 
+%   rv = [6x1] position and velocity states vector in ECI frame 
 % 
 % Outputs 
 %   oe = [6x1] orbital elements: a, e, i, w, Omega, nu
-%           a       = semimajor axis 
-%           e       = eccentricity 
-%           i       = inclination 
-%           w       = argument of perigee 
-%           Omega   = right ascension of ascending node 
-%           nu      = true anomaly 
+%           a   = semimajor axis 
+%           e   = eccentricity 
+%           i   = inclination 
+%           w   = argument of perigee 
+%           O   = right ascension of ascending node 
+%           M  = mean anomaly 
 % ------------------------------------------------------------------------
 
 global mu 
@@ -45,15 +45,15 @@ i = acos(h(3)/norm(h));
 
 % right ascension of ascending node (check for equatorial orbit) 
 if i > 0.000001
-    Omega = acos( nhat(1)/norm(nhat) ); 
+    O = acos( nhat(1)/norm(nhat) ); 
 else
-    Omega = 0; 
+    O = 0; 
 end
-if isnan(Omega)
-    Omega = 0; 
+if isnan(O)
+    O = 0; 
 end
 if nhat(2)<0
-   Omega = 2*pi - Omega; 
+   O = 2*pi - O; 
 end
 
 % argument of perigee 
@@ -75,6 +75,11 @@ nu = acos( dot(evec,r) / (e*norm(r)) );
 %    nu = 360 - nu
 % end
 
-oe = [a; e; i; w; Omega; nu]; 
+%Apply Quadrant Checks to All Determined Angles
+% idx = nhat(2) < 0; if any(idx); O(idx) = 2*pi - O(idx);  end
+% idx = evec(3) < 0; if any(idx); w(idx) = 2*pi - w(idx); end
+idx = dot(r,v) < 0; if any(idx); nu(idx) = 2*pi - nu(idx); end
+
+oe = [a; e; i; w; O; nu]; 
 
 end

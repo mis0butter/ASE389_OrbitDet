@@ -31,13 +31,16 @@ UJ2 = -mu/r * J2 * (RE/r)^2 * ( 3/2 * ( sin(phi) )^2 - 1/2 );
 d_UJ2 = gradient(UJ2, [x y z]); 
 d_UJ2 = simplify(d_UJ2); 
 
-% Initial conditions 
+% Initial conditions (km)
 r  = [ -2436.45; -2436.45; 6891.037 ]; 
-v  = [ 5.088611; 5.088611; 0 ]; 
+v  = [ 5.088611; -5.088611; 0 ]; 
 rv = [r; v]; 
 
-% orbital elements 
-oe = rv2orb_OG(rv);  
+% orbital elements (and sanity check) 
+% [a,eMag,i,O,o,nu,truLon,argLat,lonPer,p] = rv2orb_OG(r, v);  
+% [r,v] = orb2rv_OG(p,eMag,i,O,o,nu,truLon,argLat,lonPer,mu); 
+oe = rv2oe(rv);
+rv_check = oe2rv(oe); 
 
 % 1 day period 
 % a = oe(1); 
@@ -47,9 +50,12 @@ T = 60 * 60 * 24;
 rel_tol = 1e-14;         % 1e-14 accurate; 1e-6 coarse 
 abs_tol = 1e-16; 
 options = odeset('reltol', rel_tol, 'abstol', abs_tol ); 
-[t,x] = ode45(@TwoBod_6states, [0 T], [r; v], options); 
+[t,x_p] = ode45(@TwoBod_6states, [0 T], [r; v], options); 
 
-%% Problem 1
+[t,x_pJ2] = ode45(@TwoBod_6states, [0 T], [r; v], options); 
+
+
+%% Problem 2
 
 
 

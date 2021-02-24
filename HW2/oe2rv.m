@@ -19,7 +19,7 @@ a       = oe(1);
 e       = oe(2); 
 i       = oe(3); 
 w       = oe(4); 
-LAN     = oe(5); 
+O     = oe(5); 
 % M0      = oe(6); 
 nu      = oe(6); 
 
@@ -39,13 +39,13 @@ r_pf = [ r * cos(nu); r * sin(nu); 0 ];
 v_pf = [ -sqrt(mu/p) * sin(nu); sqrt(mu/p) * (e + cos(nu)); 0 ]; 
 
 % Perifocal to ECI transformation, 3-1-3 rotation 
-R11 = cos(LAN)*cos(w) - sin(LAN)*sin(w)*cos(i); 
-R12 = -cos(LAN)*sin(w) - sin(LAN)*cos(w)*cos(i); 
-R13 = sin(LAN)*sin(i); 
+R11 = cos(O)*cos(w) - sin(O)*sin(w)*cos(i); 
+R12 = -cos(O)*sin(w) - sin(O)*cos(w)*cos(i); 
+R13 = sin(O)*sin(i); 
 
-R21 = sin(LAN)*cos(w) + cos(LAN)*sin(w)*cos(i); 
-R22 = -sin(LAN)*sin(w) + cos(LAN)*cos(w)*cos(i); 
-R23 = -cos(LAN)*sin(i); 
+R21 = sin(O)*cos(w) + cos(O)*sin(w)*cos(i); 
+R22 = -sin(O)*sin(w) + cos(O)*cos(w)*cos(i); 
+R23 = -cos(O)*sin(i); 
 
 R31 = sin(w)*sin(i); 
 R32 = cos(w)*sin(i); 
