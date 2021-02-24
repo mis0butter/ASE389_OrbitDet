@@ -1,5 +1,5 @@
 % ASE 389 Orbit Determination
-% HW 1
+% HW 2
 % Junette Hsin 
 
 %% Problem 1 
