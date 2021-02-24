@@ -5,7 +5,7 @@
 %% Problem 1 
 
 syms x y z 
-global mu 
+global mu RE J2 
 
 % constants 
 mu = 398600.4;      % G * M1 * M2 
@@ -52,7 +52,7 @@ abs_tol = 1e-16;
 options = odeset('reltol', rel_tol, 'abstol', abs_tol ); 
 [t,x_p] = ode45(@TwoBod_6states, [0 T], [r; v], options); 
 
-[t,x_pJ2] = ode45(@TwoBod_6states, [0 T], [r; v], options); 
+[t,x_pJ2] = ode45(@TwoBod_UJ2, [0 T], [r; v], options); 
 
 
 %% Problem 2
