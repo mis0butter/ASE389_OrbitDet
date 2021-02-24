@@ -49,21 +49,21 @@ total specific energy were analyzed.
 
 
 % ================================================================ % 
-\section{Introduction}
+\section*{Introduction}
 
 %HW1 intro: In this assignment, a tool was created to numerically propagate a circular orbit about the Earth and to convert between Cartesian and Keplerian orbital elements. 2 solutions for the derivation of the gradient potential function are given. 2-body equations of motion and constants of motion are also explored. The software implemented in this assignment will be used later in the course provides additional background and/or a review of basic orbital mechanics.
 
 
 % ================================================================ % 
-\section{Problem 1}
+\section*{Problem 1}
 
-\subsubsection{Statement} 
+\subsubsection*{Statement} 
 \begin{center}
 \fbox{\includegraphics[width=0.9\textwidth]{prob_1.png}} \\
 \end{center}
 
 % ---------------------------------------------------------------- % 
-\subsubsection{Solution} 
+\subsubsection*{Solution} 
 
 %The algorithms to convert orbital elements to Cartesian and back were taken from References \cite{bate_astrodynamics} and \cite{jah_mod3}. First, the specific angular momentum vector, $h$, and perpendicular node vector (to the plane of the orbit), $n$, were calculated. Inclination, eccentricity, and the rest of the orbital elements followed while checking for equatorial orbits, NaNs, and quadrants of angles. Given the spacecraft position and velocity vectors from the problem statement, the Keplerian elements are: 
 %
@@ -83,66 +83,114 @@ total specific energy were analyzed.
 
 % ================================================================ % 
 
-\subsection{Problem 1a} 
-\begin{center}
-	\fbox{\includegraphics[width=0.9\textwidth]{prob_2.png}} \\
-\end{center}
+\subsection*{Problem 1a} 
 
-\subsubsection{Statement} 
+\subsubsection*{Statement} 
+\begin{center}
+	\fbox{\includegraphics[width=0.9\textwidth]{prob_1a.png}} \\
+\end{center}
 
 % ---------------------------------------------------------------- % 
 
-\subsubsection{Solution} 
+\subsubsection*{Solution} 
 
 
 % ================================================================ % 
 
-\subsection{Problem 1b} 
-\begin{center}
-	\fbox{\includegraphics[width=0.9\textwidth]{prob_2.png}} \\
-\end{center}
+\subsection*{Problem 1b} 
 
-\subsubsection{Statement} 
+\subsubsection*{Statement} 
+\begin{center}
+	\fbox{\includegraphics[width=0.9\textwidth]{prob_1b.png}} \\
+\end{center}
 
 % ---------------------------------------------------------------- % 
 
-\subsubsection{Solution} 
-
-
-
-% ================================================================ % 
-
-\subsection{Problem 1c} 
-\begin{center}
-	\fbox{\includegraphics[width=0.9\textwidth]{prob_2.png}} \\
-\end{center}
-
-\subsubsection{Statement} 
-
-% ---------------------------------------------------------------- % 
-
-\subsubsection{Solution} 
-
+\subsubsection*{Solution} 
 
 
 
 % ================================================================ % 
 
-\subsection{Problem 1d} 
-\begin{center}
-	\fbox{\includegraphics[width=0.9\textwidth]{prob_2.png}} \\
-\end{center}
+\subsection*{Problem 1c} 
 
-\subsubsection{Statement} 
+\subsubsection*{Statement} 
+\begin{center}
+	\fbox{\includegraphics[width=0.9\textwidth]{prob_1c.png}} \\
+\end{center}
 
 % ---------------------------------------------------------------- % 
 
-\subsubsection{Solution} 
+\subsubsection*{Solution} 
+
+
 
 
 % ================================================================ % 
 
-\section{Conclusion} 
+\subsection*{Problem 1d} 
+
+\subsubsection*{Statement} 
+\begin{center}
+	\fbox{\includegraphics[width=0.9\textwidth]{prob_1d.png}} \\
+\end{center}
+
+% ---------------------------------------------------------------- % 
+
+\subsubsection*{Solution} 
+
+
+
+
+% ================================================================ % 
+
+\section*{Problem 2} 
+
+\subsubsection*{Statement} 
+\begin{center}
+	\fbox{\includegraphics[width=0.9\textwidth]{prob_2.png}} \\
+\end{center}
+
+% ---------------------------------------------------------------- % 
+
+\subsubsection*{Solution} 
+
+
+
+
+% ================================================================ % 
+
+\subsection*{Problem 2a} 
+
+\subsubsection*{Statement} 
+\begin{center}
+	\fbox{\includegraphics[width=0.9\textwidth]{prob_2a.png}} \\
+\end{center}
+
+% ---------------------------------------------------------------- % 
+
+\subsubsection*{Solution} 
+
+
+
+
+% ================================================================ % 
+
+\subsection*{Problem 2b} 
+
+\subsubsection*{Statement} 
+\begin{center}
+	\fbox{\includegraphics[width=0.9\textwidth]{prob_2b.png}} \\
+\end{center}
+
+% ---------------------------------------------------------------- % 
+
+\subsubsection*{Solution} 
+
+
+% ================================================================ % 
+
+\section*{Conclusion} 
 
 %HW1: Calculating orbital elements to and from Cartesian position and velocity vectors can be tricky because of the quadrant ambiguities when performing trigonometric computations. Problem 3 might have included a typo in its problem statement for the gravity potential function; the potential is commonly given as $U = \mu/r$ in which r is the distance between 2 bodies, not $U = \mu / ( \underline{R} \cdot \underline{R} )$. Solutions were given for both potential equations. Though position and velocity may vary along an orbit, there are constants of motion such as angular momentum and specific mechanical energy which govern the motion of celestial bodies. 
 
@@ -151,9 +199,9 @@ total specific energy were analyzed.
 % ================================================================ % 
 
 \newpage
-\section{Appendix} 
+\section*{Appendix} 
 
-\subsection{HW1 MATLAB code} 
+\subsection*{HW1 MATLAB code} 
 
 \begin{lstlisting}[basicstyle=\footnotesize]
 % ASE 389 Orbit Determination
@@ -341,7 +389,7 @@ print(h,name,'-dpdf','-r0')
 end 
 \end{lstlisting}
 
-\subsection{rv2oe function}
+\subsection*{rv2oe function}
 
 \begin{lstlisting}[basicstyle=\footnotesize]
 function oe = rv2oe(rv)
@@ -426,7 +474,7 @@ oe = [a; e; i; w; Omega; nu];
 end
 \end{lstlisting}
 
-\subsection{oe2rv function}
+\subsection*{oe2rv function}
 
 \begin{lstlisting}
 function [rv] = oe2rv(oe)
