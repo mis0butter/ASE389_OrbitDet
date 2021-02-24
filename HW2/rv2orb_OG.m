@@ -61,8 +61,17 @@
 % Programed by Darin Koblick  03-04-2012                                  %
 % Updated to address circular equatorial orbits       12/12/2013          %
 %------------------------------------------------------------------       %
-function [a,eMag,i,O,o,nu,truLon,argLat,lonPer,p] = rv2orb(r,v,mu)
+function [oe, oe_extra] = rv2orb(rv,mu)
 % if ~exist('mu','var');  t = getConst(); mu = t.Earth.Mu; end
+
+r = rv(1:3); v = rv(4:6); 
+
+if ~iscolumn(r)
+    r = r'; 
+end
+if ~iscolumn(v)
+    v = v'; 
+end 
 
 global mu 
 
@@ -89,22 +98,37 @@ end
 %Compute the angles
 i = acos(h(3,:)./hMag); 
 O = acos(n(1,:)./nMag);
-o = acos(dot(n,e)./(nMag.*eMag));
+w = acos(dot(n,e)./(nMag.*eMag));
 nu = acos(dot(e,r)./(eMag.*rMag));
 lonPer = acos(e(1,:)./eMag);
 argLat = acos(dot(n,r)./(nMag.*rMag));
 truLon = acos(r(1,:)./rMag);
 %Account for those cases where satellite is in circular orbit
          O(n(1,:) == 0) = 0;
-       o(dot(n,e) == 0) = 0;
+       w(dot(n,e) == 0) = 0;
     lonPer(e(1,:) == 0) = 0;
       nu(dot(e,r) == 0) = 0;
   argLat(dot(n,r) == 0) = 0;
 %Apply Quadrant Checks to All Determined Angles
 idx = n(2,:) < 0; if any(idx);  O(idx) = 2*pi - O(idx);  end
-idx = e(3,:) < 0; if any(idx); o(idx) = 2*pi - o(idx); end
+idx = e(3,:) < 0; if any(idx); w(idx) = 2*pi - w(idx); end
 idx = dot(r,v) < 0; if any(idx); nu(idx) = 2*pi - nu(idx); end
 idx = e(2,:) < 0; if any(idx); lonPer(idx) = 2*pi-lonPer(idx);  end
 idx = r(3,:) < 0; if any(idx); argLat(idx) = 2*pi - argLat(idx); end
 idx = r(2,:) < 0; if any(idx); truLon(idx) = 2*pi - truLon(idx); end
+
+oe = zeros(6,1); 
+oe(1) = a; 
+oe(2) = eMag; 
+oe(3) = i; 
+oe(4) = w; 
+oe(5) = O; 
+oe(6) = nu; 
+
+oe_extra = zeros(4,1); 
+oe_extra(1) = truLon; 
+oe_extra(2) = argLat; 
+oe_extra(3) = lonPer; 
+oe_extra(4) = p; 
+
 end
