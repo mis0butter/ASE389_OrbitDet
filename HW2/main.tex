@@ -10,6 +10,7 @@
 \usepackage{longtable,tabularx}
 \usepackage{float}
 \usepackage{listings}
+\usepackage{pdfpages}
 \usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
 \definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
 \definecolor{mylilas}{RGB}{170,55,241}
@@ -44,7 +45,8 @@
 
 \begin{abstract}
 New force models have been added to the orbit propagator created in Homework 1. The effects that these new forces have on the Keplerian orbit elements and the
-total specific energy were analyzed.
+total specific energy were analyzed.
+
 \end{abstract}
 
 
@@ -93,6 +95,16 @@ total specific energy were analyzed.
 % ---------------------------------------------------------------- % 
 
 \subsubsection*{Solution} 
+
+%     -(3*J2*RE^2*mu*x*(x^2 + y^2 - 4*z^2))/(2*(x^2 + y^2 + z^2)^(7/2))
+%-(3*J2*RE^2*mu*y*(x^2 + y^2 - 4*z^2))/(2*(x^2 + y^2 + z^2)^(7/2))
+%-(3*J2*RE^2*mu*z*(3*x^2 + 3*y^2 - 2*z^2))/(2*(x^2 + y^2 + z^2)^(7/2))
+
+The full derivation is included in the appendix. 
+
+\begin{equation}
+	\partial U / \partial x = -J_2 \mu R_E^2 \Big( \dfrac{3x}{2} \Big) \dfrac{ x^2 + y^2 - 4z^2 }{ (x^2 + y^2 + z^2)^{7/2} }
+\end{equation}
 
 
 % ================================================================ % 
@@ -201,6 +213,13 @@ total specific energy were analyzed.
 \newpage
 \section*{Appendix} 
 
+\subsection*{ $\partial U / \partial x$ derivation}
+
+\includegraphics[page=1, width=\textwidth]{dUdx_derivation.pdf} \newpage
+\includegraphics[page=2, width=\textwidth]{dUdx_derivation.pdf} \newpage
+\includegraphics[page=3, width=\textwidth]{dUdx_derivation.pdf}
+
+\newpage
 \subsection*{HW1 MATLAB code} 
 
 \begin{lstlisting}[basicstyle=\footnotesize]
