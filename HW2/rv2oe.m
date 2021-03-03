@@ -1,4 +1,4 @@
-function oe = rv2oe(rv)
+function [oe, Tp] = rv2oe(rv)
 % ------------------------------------------------------------------------
 % Inputs 
 %   rv = [6x1] position and velocity states vector in ECI frame 
@@ -10,7 +10,8 @@ function oe = rv2oe(rv)
 %           i   = inclination 
 %           w   = argument of perigee 
 %           O   = right ascension of ascending node 
-%           M  = mean anomaly 
+%           M   = mean anomaly 
+%           Tp  = time of perigee passing  (optional output) 
 % ------------------------------------------------------------------------
 
 global mu 
@@ -81,5 +82,13 @@ nu = acos( dot(evec,r) / (e*norm(r)) );
 idx = dot(r,v) < 0; if any(idx); nu(idx) = 2*pi - nu(idx); end
 
 oe = [a; e; i; w; O; nu]; 
+
+% perigee passing time 
+
+rnorm = norm(r); 
+n = sqrt(mu/a^3); 
+E = acos( rnorm/a * cos(nu) + e );
+M = E - e*sin(E); 
+Tp = M/n; 
 
 end

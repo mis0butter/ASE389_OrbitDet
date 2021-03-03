@@ -51,12 +51,6 @@ total specific energy were analyzed.
 
 
 % ================================================================ % 
-\section*{Introduction}
-
-%HW1 intro: In this assignment, a tool was created to numerically propagate a circular orbit about the Earth and to convert between Cartesian and Keplerian orbital elements. 2 solutions for the derivation of the gradient potential function are given. 2-body equations of motion and constants of motion are also explored. The software implemented in this assignment will be used later in the course provides additional background and/or a review of basic orbital mechanics.
-
-
-% ================================================================ % 
 \section*{Problem 1}
 
  % \subsubsection*{Statement} 
@@ -83,6 +77,7 @@ total specific energy were analyzed.
 %where $a$ is the semi-major axis, $e$ is the eccentricity, $i$ is the orbit inclination, $\omega$ is the argument of perigee, $\Omega$ is the right ascension of the ascending node, and $\nu$ is the true anomaly. 
 
 
+\newpage
 % ================================================================ % 
 
 \subsection*{Problem 1a} 
@@ -100,13 +95,44 @@ total specific energy were analyzed.
 %-(3*J2*RE^2*mu*y*(x^2 + y^2 - 4*z^2))/(2*(x^2 + y^2 + z^2)^(7/2))
 %-(3*J2*RE^2*mu*z*(3*x^2 + 3*y^2 - 2*z^2))/(2*(x^2 + y^2 + z^2)^(7/2))
 
-The derivation by hand is included in the appendix. The hand-derived and MATLAB results were the same. 
+The derivation by hand is included in the appendix. The hand-derived and MATLAB results were the same. The final equation for $\partial U / \partial x $ is: 
 
 \begin{equation}
 	\partial U / \partial x = -J_2 \mu R_E^2 \Big( \dfrac{3x}{2} \Big) \dfrac{ x^2 + y^2 - 4z^2 }{ (x^2 + y^2 + z^2)^{7/2} }
 \end{equation}
 
+The MATLAB code used for the entire homework, including calculating the partial derivatives is included in the Appendix, but the snippet used to solve Problem 1a is shown here: 
 
+\begin{lstlisting}
+syms x y z 
+global mu RE J2 
+
+% constants 
+% mu = 398600.4;      % G * M1 * M2 
+% RE = 6378.145;      % Earth radius 
+% J2 = 0.00108248;    % J2 
+
+% for symbolic representation 
+syms mu RE J2 
+
+% radius 
+r = sqrt(x^2 + y^2 + z^2); 
+
+% U point mass 
+Up = mu/r; 
+
+% latitude 
+phi = asin(z/r); 
+
+% U J2 
+UJ2 = -mu/r * J2 * (RE/r)^2 * ( 3/2 * ( sin(phi) )^2 - 1/2 ); 
+
+% gradient 
+d_UJ2 = gradient(UJ2, [x y z]); 
+d_UJ2 = simplify(d_UJ2); 
+\end{lstlisting}
+
+\newpage
 % ================================================================ % 
 
 \subsection*{Problem 1b} 
@@ -120,8 +146,31 @@ The derivation by hand is included in the appendix. The hand-derived and MATLAB 
 
 \subsubsection*{Solution} 
 
+Based on the initial state, the period of the orbit is: 
 
+\begin{equation}
+	P = 2 \pi \sqrt{ a^3 / \mu } = 6.740270469266463e+03 s 
+\end{equation}
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Problem 1b - Orbital Elements.pdf}
+	\caption{Orbital elements of point mass and point mass with J2 zonal elements} 
+	\label{fig:prob_1b}	
+\end{figure}
+
+Figure \ref{fig:prob_1b} shows that the Keplerian orbital elements are remarkably stable over time. Once J2 terms were introduced, the orbit elements exhibited periodic oscillating behavior for most of the orbital elements with the exception of right ascension of the ascending node. The motion of the orbiting body in the orbital plane is planar, therefore the body will move through lines of nodes at the ascending node, where it moves from -Z to +Z in the orbit frame (in other words, the body enters the northern hemisphere from the southern hemisphere at the crossing of the ascending node) \cite{born_statorbitdet}. The linearly decreasing ramp indicates that the J2 terms perturb a constant rate effect on the node. 
+
+The time of perigee passing has a period of approximately 6.74e3 seconds, which matches the calculation of the orbit period. The other orbit elements contain higher frequency content; perhaps these elements are likely sensitive to the J2 terms in geometric ways. In Figure \ref{fig:prob_1b_2bod}, the orbits of the point mass and point mass with modeled J2 terms is shown. The point mass orbit is very stable while the J2 orbit perturbed more and more as the day went by. 
+
+\begin{figure}
+	\centering 
+	\includegraphics[width=0.8\textwidth]{Problem 1 - 2-Body EOM Orbit.pdf}
+	\caption{2-body EOM Orbit of Point Mass with J2 term}
+	\label{fig:prob_1b_2bod}
+\end{figure}
+
+\newpage
 % ================================================================ % 
 
 \subsection*{Problem 1c} 
@@ -135,9 +184,25 @@ The derivation by hand is included in the appendix. The hand-derived and MATLAB 
 
 \subsubsection*{Solution} 
 
+The gravitational potential function (below) was added to the magnitude of the velocity squared over 2 for each timestep of the simulation, which was specified at 20 seconds, to compute the specific energy. 
+
+\begin{equation}
+	U = U_{point mass} + U_{J_2} = \dfrac{\mu}{r} \Bigg[ 1 - J_2 \Bigg( \dfrac{R_{Earth} }{ r }^2 \Bigg) 
+	\Bigg( \dfrac{3}{2} sin^2 ( \phi ) - \dfrac{1}{2} \Bigg) \Bigg]
+\end{equation}
+
+Then, to show that the specific energy is conserved, the specific energy at each timestep was subtracted with its initial value. The order of the magnitude on the plot is -12, which is a tiny change. The specific energy was around 25.815 km$^2$/s$^2$ for the duration of the simulation. 
 
 
+\begin{figure}[H]
+	\centering 
+	\includegraphics[width=0.8\textwidth]{Problem 1c - Delta Specific Energy.pdf}	
+	\caption{Delta Specific Energy} 
+	\label{fig:prob_1c}
+\end{figure}
 
+
+\newpage
 % ================================================================ % 
 
 \subsection*{Problem 1d} 
@@ -151,9 +216,20 @@ The derivation by hand is included in the appendix. The hand-derived and MATLAB 
 
 \subsubsection*{Solution} 
 
+The kth-component of the (specific) angular momentum vector was also incredibly stable for the duration of the simulation. The angular momentum vector is normal to the orbit plane and is a fundamental property of the orbit frame and the conservation of orbital energy. Changing orbital energy would lead to a changing specific angular momentum vector. Although the other components of the angular momentum vector experienced periodic behavior, the kth component remained within an order of magnitude of -10 to its initial value. 
+
+\begin{figure}[H]
+	\centering 
+	\includegraphics[width=0.8\textwidth]{Problem 1d - Delta Angular Momentum.pdf}
+	\caption{Delta Angular Momentum} 
+	\label{fig:prob_1d}
+\end{figure}
+
+The plot for the k component of the angular momentum vector was computed and then differenced. 
 
 
 
+\newpage
 % ================================================================ % 
 
 \section*{Problem 2} 
@@ -170,6 +246,7 @@ The derivation by hand is included in the appendix. The hand-derived and MATLAB 
 
 
 
+\newpage
 % ================================================================ % 
 
 \subsection*{Problem 2a} 
@@ -183,9 +260,17 @@ The derivation by hand is included in the appendix. The hand-derived and MATLAB 
 
 \subsubsection*{Solution} 
 
+From the plot shown below, the inference that total energy is conserved can confidently be made. Specific energy is related to the angular momentum of the system, which is conserved even with the presence of drag \cite{jah_mod3}. Drag is not a conservative force, and thus does not have a significant impact on the system energy. 
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Problem 2a - Delta Specific Energy.pdf}
+	\caption{Delta Specific Energy for Point Mass with J2 Terms and Drag}
+\end{figure}
 
 
 
+\newpage
 % ================================================================ % 
 
 \subsection*{Problem 2b} 
@@ -197,15 +282,52 @@ The derivation by hand is included in the appendix. The hand-derived and MATLAB 
 
 % ---------------------------------------------------------------- % 
 
+Results for the four cases (point mass, J2, drag, and J2 + drag) and their differences are shown below. To compare differences, there ended up being 6 delta cases analyzed: 
+
+\begin{enumerate}
+	\item point mass - J2 
+	\item point mass - drag 
+	\item point mass - (J2 + drag) 
+	\item J2 - drag 
+	\item J2 - (J2 + drag) 
+	\item drag - (J2 + drag) 
+\end{enumerate}
+
+The J2 terms are extremely dominant and make it hard to discern the error between J2 and J2 + drag. The perturbation that drag ended up having on the final state of point mass is shown below (p-drag): 
+
+\begin{table}[H]	
+\begin{tabular}{|l|l|l|l|}
+	\hline 
+	position & -0.009913492249325 $\hat{i}$   & 0.547834133612923$\hat{j}$  & -0.776935848989524 $\hat{k}$ \\
+	\hline 
+	velocity & -0.000683365863896 $\hat{i}$  & 0.000451816362101$\hat{j}$   & 0.000329869465077 $\hat{k}$ \\ 
+	\hline 
+\end{tabular}
+\end{table}
+* 10$^{-8}$ 
+
+Drag seems to have a near-negligible effect on the motion of the body. The plot of the difference between the point mass and drag is almost zero for the duration of the simulation. Drag does seem to have a slightly larger influence on right ascension of the ascending node than the other elements for this batch of runs, but the effects become far more interesting in the orbit elements plot between J2 and drag.  The time of perigee passing appears to be the most sensitive to drag; slight perturbations can be observed in the plots below. Overall, the J2 effects are clearly dominant in Figure \ref{fig:orb_j2_drag}. 
+
 \subsubsection*{Solution} 
 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{Problem 2b - Orbital Elements.pdf}
+	\caption{Orbital Elements for Point Mass with J2 Terms and Drag} 
+\end{figure}
 
-% ================================================================ % 
+\begin{figure}[H]
+	\centering 
+	\includegraphics[width=0.8\textwidth]{Problem 2b - Orbital Elements Point Mass Diff.pdf}
+	\caption{Orbital Elements Point Mass Difference} 
+\end{figure}
 
-\section*{Conclusion} 
-
-%HW1: Calculating orbital elements to and from Cartesian position and velocity vectors can be tricky because of the quadrant ambiguities when performing trigonometric computations. Problem 3 might have included a typo in its problem statement for the gravity potential function; the potential is commonly given as $U = \mu/r$ in which r is the distance between 2 bodies, not $U = \mu / ( \underline{R} \cdot \underline{R} )$. Solutions were given for both potential equations. Though position and velocity may vary along an orbit, there are constants of motion such as angular momentum and specific mechanical energy which govern the motion of celestial bodies. 
-
+\begin{figure}[H]
+	\centering 
+	\includegraphics[width=0.8\textwidth]{Problem 2b - Orbital Elements J2 and Drag Diff.pdf}
+	\caption{Orbital Elements J2 and Drag Difference} 
+	\label{fig:orb_j2_drag}
+\end{figure}
 
 
 % ================================================================ % 
@@ -220,181 +342,378 @@ The derivation by hand is included in the appendix. The hand-derived and MATLAB 
 \includegraphics[page=3, width=\textwidth]{dUdx_derivation.pdf}
 
 \newpage
-\subsection*{HW1 MATLAB code} 
+\subsection*{HW2 MATLAB code} 
 
 \begin{lstlisting}[basicstyle=\footnotesize]
 % ASE 389 Orbit Determination
-% HW 1
+% HW 2
 % Junette Hsin 
+
+clear; 
+
+positionA = [100 100 600 600]; 
+positionB = [100 100 700 900]; 
 
 %% Problem 1 
 
-global mu 
+syms x y z 
+global mu RE J2 
 
-mu = 398600.5 ; 
-r  = [ -2436.45; -2436.45; 6891.037 ]; 
-v  = [ 5.088611; 5.088611; 0 ]; 
+% constants 
+mu = 398600.4;      % G * M1 * M2 
+RE = 6378.145;      % Earth radius 
+J2 = 0.00108248;    % J2 
 
-rv = [r; v]; 
-oe = rv2oe(rv);  
+% testing 
+% syms mu RE J2 
 
-%% Problem 2 
+% radius 
+r = sqrt(x^2 + y^2 + z^2); 
 
-rv = oe2rv(oe); 
+% U point mass 
+Up = mu/r; 
 
-%% Problem 3 
+% latitude 
+phi = asin(z/r); 
 
-x = -2436.45; 
-y = -2436.45; 
-z = 6891.037; 
-mu = 398600.5; 
+% U J2 
+UJ2 = -mu/r * J2 * (RE/r)^2 * ( 3/2 * ( sin(phi) )^2 - 1/2 ); 
 
-dux = -2*mu*x / ( x^2 + y^2 + z^2 )^2; 
-duy = -2*mu*y / ( x^2 + y^2 + z^2 )^2;
-duz = -2*mu*z / ( x^2 + y^2 + z^2 )^2;
+% gradient 
+d_UJ2 = gradient(UJ2, [x y z]); 
+d_UJ2 = simplify(d_UJ2); 
 
-rnorm = sqrt( x^2 + y^2 + z^2 ); 
+% Initial conditions (km)
+r0  = [ -2436.45; -2436.45; 6891.037 ]; 
+v0  = [ 5.088611; -5.088611; 0 ]; 
+rv0 = [r0; v0]; 
 
-dux = -mu*x / ( rnorm )^3; 
-duy = -mu*y / ( rnorm )^3; 
-duz = -mu*z / ( rnorm )^3;
+% orbital elements (and sanity check) 
+oe0 = rv2oe(rv0);
+rv_check2 = oe2rv(oe0); 
+[oe_check, oe_extra] = rv2orb_OG(rv0);  
+[rv_check] = orb2rv_OG(oe_check, oe_extra); 
 
-%% Problem 4 
+% 1 day period 
+% a = oe(1); 
+% T = abs(2 * pi * sqrt(a^3 / mu));        % period 
+T = 60 * 60 * 24; 
+dt = 20; 
 
-a = oe(1); 
-T   = abs(2 * pi * sqrt(a^3 / mu));        % period 
+% set ode45 params 
+rel_tol = 1e-14;         % 1e-14 accurate; 1e-6 coarse 
+abs_tol = 1e-16; 
+options = odeset('reltol', rel_tol, 'abstol', abs_tol ); 
 
-toler   = 1e-8;         % 1e-14 accurate; 1e-6 coarse 
-options = odeset('reltol', toler, 'abstol', toler ); 
-[t,x] = ode45(@TwoBod_6states, [0 2*T], [r; v], options); 
-
-for i = 1:length(t)
-rnorm(i) = norm(x(i, 1:3)); 
-vnorm(i) = norm(x(i, 4:6)); 
-H(i, :) = cross(x(i, 1:3), x(i, 4:6)); 
-hnorm(i) = norm(H(i, :)); 
-end 
-
-anorm = 0; 
-for i = 2:length(t)
-a = (x(i, 4:6) - x(i-1, 4:6)) / ( t(i) - t(i-1) ); 
-anorm(i) = norm(a); 
-end 
-
-% ------------------------------------------------------------------------
-
-name = 'Problem 4: 2-Body EOM'; 
-h = figure('name', name); 
-
-% position 
-subplot(3,1,1)
-plot(t, rnorm); grid on 
-title('r norm') 
-ylabel('km')
-
-% velocity 
-subplot(3,1,2) 
-plot(t, vnorm); grid on 
-title('v norm') 
-ylabel('km/s')
-
-% acceleration 
-subplot(3,1,3) 
-plot(t, anorm); grid on 
-title('a norm'); 
-ylabel('km/s^2')
-xlabel('time (sec)') 
-
-sgtitle(name)
-
-save_pdf(h, 'prob4_2bodeom'); 
+% INTEGRATE! Point mass and J2 
+[t_p, x_p] = ode45(@TwoBod_6states, [0:dt:T], [r0; v0], options); 
+[t_J2, x_J2] = ode45(@TwoBod_UJ2, [0:dt:T], [r0; v0], options); 
 
 % ------------------------------------------------------------------------
 
-name = 'Problem 4: 2-Body EOM Orbit'; 
-h = figure('name', name); 
+name = 'Problem 1 - 2-Body EOM Orbit'; 
+h = figure('name', name, 'position', positionA + [50 0 0 0]); 
+
+x = x_p; 
 plot3(x(:,1), x(:,2), x(:,3)); hold on; grid on; 
-plot3(x(1,1), x(1,2), x(1,3), 'o')
-plot3(x(end,1), x(end,2), x(end,3), 'x') 
+x = x_J2; 
+plot3(x(:,1), x(:,2), x(:,3)); hold on; grid on; 
+
+x = x_p; 
+plot3(x(1,1), x(1,2), x(1,3), 'mo')
+plot3(x(end,1), x(end,2), x(end,3), 'cx') 
+
+x = x_J2; 
+plot3(x(1,1), x(1,2), x(1,3), 'mo')
+plot3(x(end,1), x(end,2), x(end,3), 'cx') 
+
+legend('point mass', 'J2', 'start', 'end')
+
 xlabel('x (km)')
 ylabel('y (km)') 
 zlabel('z (km)') 
-legend('orbit', 'start', 'end')
+%     legend('orbit', 'start', 'end')
 
 sgtitle(name) 
+save_pdf(h, name); 
 
-save_pdf(h, 'prob4_2bodeom_orbit'); 
+%% problem 1b 
+
+clear oe oe_check oe_p Tp_p Tp_pJ2 oe_pJ2 
+
+for i = 1:length(x_p) 
+[oe_p(i, :), Tp_p(i,:)] = rv2oe( x_p(i, :) ); 
+oe_check(i, :) = rv2orb_OG( x_p(i, :) ); 
+%     Tp_p(i,:) = perigee_pass(oe_p(i,:), x_p(i,:)); 
+end 
+
+
+for i = 1:length(x_J2)
+oe_J2(i,:) = rv2oe( x_J2(i, :) ); 
+oe_check(i,:) = rv2orb_OG( x_J2(i, :) ); 
+
+Tp_J2(i,:) = perigee_pass(oe_J2(i,:), x_J2(i,:)); 
+end 
+
+% Time of perigee passage 
+% n = mean motion = sqrt(mu/a^3)
+% E = acos( r/a * cos(nu) + e )
+% M = mean anomaly = E - e*sin(E)
+% Tp = t0 - M/n 
 
 % ------------------------------------------------------------------------
 
-clear oe 
-for i = 1:length(t)
-oe(i,:) = rv2oe(x(i,:)); 
-end 
-
-labels = {'a', 'e', 'i', '\omega', '\Omega', '\nu'}; 
+labels = {'a', 'e', 'i', '\omega', '\Omega', 'T_p'}; 
 units = {'km', '', 'rad', 'rad', 'rad', 'rad'}; 
-name = 'Problem 4: 2-Body Orbital Elements'; 
-h = figure('name', name, 'position', [100 100 500 600]); 
-for i = 1:6
-subplot(6,1,i)
-plot(t, oe(:, i)); grid on 
+name = 'Problem 1b - Orbital Elements'; 
+h = figure('name', name, 'position', positionB + [50 0 0 0]); 
+for i = 1:5
+subplot(6,1,i) 
+plot(t_J2, oe_J2(:, i)); hold on; grid on; 
+plot(t_p, oe_p(:, i)); 
 title(labels{i}); 
 ylabel(units{i}); 
+increase_ylim; 
+if i == 1
+legend('with J2', 'point mass'); 
 end 
-xlabel('time (sec)') 
-sgtitle(name)
+end 
+subplot(6,1,6) 
+plot(t_J2, Tp_J2); hold on; grid on; 
+plot(t_p, Tp_p); 
+title('T_p') 
+ylabel('s') 
+sgtitle(name) 
+xlabel('Time (sec)') 
+save_pdf(h, name); 
 
-save_pdf(h, 'prob4_2bodoes'); 
+%% Problem 1c: energy 
+
+clear vnorm 
+clear h 
+clear h_mom 
+clear dE 
+clear dh 
+clear dhnorm 
+
+for i = 1:length(x_J2)
+
+U(:,i) = comp_U(x_J2(i, 1:3)); 
+vnorm(:,i) = sqrt( x_J2(i,4)^2 + x_J2(i,5)^2 + x_J2(i,6)^2 ); 
+E(:,i) = vnorm(:,i)^2 / 2 - U(:,i); 
+a = [ x_J2(i,1), x_J2(i,2), x_J2(i,3) ]; 
+b = [ x_J2(i,4), x_J2(i,5), x_J2(i,6) ]; 
+h_mom(:,i) = cross( a , b ); 
+
+dE(:,i) = E(i) - E(1); 
+dh(:,i) = h_mom(:,i) - h_mom(:,1); 
+dhnorm(:,i) = norm( dh(:,i) ); 
+
+end 
 
 % ------------------------------------------------------------------------
 
-name = 'Problem 4: 2-Body Specific Angular Momentum'; 
-h = figure('name', name); 
-subplot(2,1,1) 
-scatter3(H(:,1), H(:,2), H(:,3)); grid on 
-xlabel('x (km^2/s)')
-ylabel('y (km^2/s)')
-zlabel('z (km^2/s)') 
-title('h (scatter plot)') 
+name = 'Problem 1c - Delta Specific Energy'; 
+h = figure('name', name, 'position', positionA + [50 0 0 0]); 
+plot(t_J2, dE); 
+title( 'dE = E(t) - E(t_0)' ) 
+xlabel('Time (s)') 
+ylabel('km^2/s^2') 
+save_pdf(h, name); 
 
-subplot(2,1,2) 
-plot(t, hnorm); grid on 
-xlabel('time (sec)') 
+
+%% Problem 1d: angular momentum 
+
+
+name = 'Problem 1d - Delta Angular Momentum'; 
+h = figure('name', name, 'position', positionA + [50 0 0 0]); 
+plot(t_J2, dh(3, :)); 
+title( 'dh_k = h_k(t) - h_k(t_0)' ) 
+xlabel('Time (s)') 
 ylabel('km^2/s') 
-title('h norm vs time')
+save_pdf(h, name); 
 
-sgtitle(name) 
 
-save_pdf(h, 'prob4_angmom')
+%% Problem 2: DRAG 
 
-%% Problem 5 
+global CD A m p0 r0_drag H dtheta 
 
-% specific kinetic energy 
-for i = 1:length(t) 
-T(i) = 0.5 * vnorm(i)^2; 
-U(i) = mu / rnorm(i); 
+CD = 2; 
+A = 3.6e-6; % --> km^2 
+m = 1350; 
+p0 = 4e-4; % --> -13 --> -4, multiply 1e9 when going 1/m^3 to 1/km^3  
+r0_drag = 7298.145; 
+H = 200; 
+dtheta = 7.29211585530066e-5; 
+
+% set 1 day period (again just in case) 
+T = 60 * 60 * 24; 
+
+% set ode45 params 
+rel_tol = 1e-14;         % 1e-14 accurate; 1e-6 coarse 
+abs_tol = 1e-16; 
+options = odeset('reltol', rel_tol, 'abstol', abs_tol ); 
+
+% INTEGRATE! Point mass and J2 and drag 
+[t_J2drag, x_J2drag] = ode45(@TwoBod_UJ2_drag, [0:dt:T], [r0; v0], options); 
+
+% INTEGRATE! Point mass and drag 
+[t_drag, x_drag] = ode45(@TwoBod_drag, [0:dt:T], [r0; v0], options); 
+
+
+%% Problem 2a: specific energy 
+
+
+clear vnorm 
+clear h 
+clear h_mom 
+clear dE 
+clear dh 
+clear dhnorm 
+
+for i = 1:length(x_J2drag)
+
+U(:,i) = comp_U(x_J2drag(i, 1:3)); 
+vnorm(:,i) = sqrt( x_J2drag(i,4)^2 + x_J2drag(i,5)^2 + x_J2drag(i,6)^2 ); 
+E(:,i) = vnorm(:,i)^2 / 2 - U(:,i); 
+a = [ x_J2drag(i,1), x_J2drag(i,2), x_J2drag(i,3) ]; 
+b = [ x_J2drag(i,4), x_J2drag(i,5), x_J2drag(i,6) ]; 
+h_mom(:,i) = cross( a , b ); 
+
+dE(:,i) = E(i) - E(1); 
+dh(:,i) = h_mom(:,i) - h_mom(:,1); 
+dhnorm(:,i) = norm( dh(:,i) ); 
+
 end 
-E = T - U; 
 
-name = 'Problem 4: 2-Body Specific Energy'; 
-h = figure('name', name); 
-subplot(2,1,1) 
-plot(t, E); grid on; hold on; 
-plot(t, T); 
-plot(t, U); 
-ylabel('km^2/s^2')
-legend('Total', 'Kinetic', 'Potential') 
-title('Total Specific Energy: Kinetic - Potential') 
-subplot(2,1,2) 
-plot(t, [0 diff(E)]); grid on 
-title('Change in Total Specific Energy') 
-xlabel('Time (sec)') 
-ylabel('km^2/s^2')
+% ------------------------------------------------------------------------
+
+name = 'Problem 2a - Delta Specific Energy'; 
+h = figure('name', name, 'position', positionA + [50 0 0 0]); 
+plot(t_J2drag, dE); 
+title( 'dE = E(t) - E(t_0)' ) 
+xlabel('Time (s)') 
+ylabel('km^2/s^2') 
+save_pdf(h, name); 
+
+%% Problem 2b: orbital elements 
+
+
+clear oe_drag Tp_drag 
+
+for i = 1:length(x_drag) 
+[oe_drag(i, :), Tp_drag(i,:)] = rv2oe( x_drag(i, :) ); 
+oe_check(i, :) = rv2orb_OG( x_p(i, :) ); 
+%     Tp_p(i,:) = perigee_pass(oe_p(i,:), x_p(i,:)); 
+end 
+
+for i = 1:length(x_J2drag) 
+[oe_J2drag(i, :), Tp_J2drag(i,:)] = rv2oe( x_J2drag(i, :) ); 
+oe_check(i, :) = rv2orb_OG( x_p(i, :) ); 
+end 
+
+% ------------------------------------------------------------------------
+
+labels = {'a', 'e', 'i', '\omega', '\Omega', 'T_p'}; 
+units = {'km', '', 'rad', 'rad', 'rad', 'rad'}; 
+name = 'Problem 2b - Orbital Elements'; 
+h = figure('name', name, 'position', positionB + [50 0 0 0]); 
+for i = 1:5
+subplot(6,1,i) 
+plot(t_J2drag, oe_J2drag(:,i)); hold on; grid on;
+plot(t_J2, oe_J2(:, i));  
+plot(t_drag, oe_drag(:, i)); 
+plot(t_p, oe_p(:, i)); 
+title(labels{i}); 
+ylabel(units{i}); 
+increase_ylim; 
+if i == 1
+legend('J2 + drag', 'J2', 'drag', 'point mass'); 
+end 
+end 
+subplot(6,1,6) 
+plot(t_J2drag, Tp_J2drag); hold on; grid on; 
+plot(t_J2, Tp_J2); 
+plot(t_drag, Tp_drag); 
+plot(t_p, Tp_p); 
+title('T_p') 
+ylabel('s') 
 sgtitle(name) 
+xlabel('Time (sec)') 
+save_pdf(h, name); 
 
-save_pdf(h, 'prob5_energy')
 
+
+% ------------------------------------------------------------------------
+% differences in orbital elements 
+
+% 6 combinations: 
+% (1) p - J2 
+% (2) p - drag 
+% (3) p - J2drag 
+% (4) J2 - drag 
+% (5) J2 - J2drag 
+% (6) drag - J2drag 
+
+% add Tp, make your life easier 
+
+oe_p = [oe_p, Tp_p]; 
+oe_J2 = [oe_J2, Tp_J2]; 
+oe_J2drag = [oe_J2drag, Tp_J2drag]; 
+oe_drag = [oe_drag, Tp_drag]; 
+
+p_J2 = oe_p - oe_J2; 
+p_drag = oe_p - oe_drag; 
+p_J2drag = oe_p - oe_J2drag; 
+J2_drag = oe_J2 - oe_drag; 
+J2_J2drag = oe_J2 - oe_J2drag; 
+drag_J2drag = oe_drag - oe_J2drag; 
+
+labels = {'a', 'e', 'i', '\omega', '\Omega', 'T_p', 'T_p'}; 
+units = {'km', '', 'rad', 'rad', 'rad', 'rad', 's'}; 
+name = 'Problem 2b - Orbital Elements Point Mass Diff'; 
+h = figure('name', name, 'position', positionB + [50 0 0 0]); 
+for i = 1:6
+subplot(6,1,i) 
+plot(t_J2, p_J2(:,i)); hold on; grid on; 
+plot(t_J2, p_drag(:,i));
+plot(t_J2, p_J2drag(:,i)); 
+
+title(labels{i}); 
+ylabel(units{i}); 
+increase_ylim; 
+if i == 1
+legend('p-J2', 'p-drag', 'p-J2drag'); 
+end 
+end 
+sgtitle(name) 
+xlabel('Time (sec)') 
+save_pdf(h, name); 
+
+labels = {'a', 'e', 'i', '\omega', '\Omega', 'T_p', 'T_p'}; 
+units = {'km', '', 'rad', 'rad', 'rad', 'rad', 's'}; 
+name = 'Problem 2b - Orbital Elements J2 and Drag Diff'; 
+h = figure('name', name, 'position', positionB + [50 0 0 0]); 
+for i = 1:6
+subplot(6,1,i) 
+plot(t_J2, J2_drag(:,i)); hold on; grid on; 
+plot(t_J2, J2_J2drag(:,i)); 
+plot(t_J2, drag_J2drag(:,i)); 
+
+title(labels{i}); 
+ylabel(units{i}); 
+increase_ylim; 
+if i == 1
+legend('J2-drag', 'J2-J2drag', 'drag-J2drag'); 
+end 
+end 
+sgtitle(name) 
+xlabel('Time (sec)') 
+save_pdf(h, name); 
+
+
+
+%%     
 %% subfunctions 
 
 function save_pdf(h, name) 
@@ -406,24 +725,79 @@ set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(
 print(h,name,'-dpdf','-r0')
 
 end 
+
+function increase_ylim
+
+ylims  = get(gca, 'ylim');
+yd     = ylims(2) - ylims(1); 
+set(gca, 'ylim', [ylims(1) - 0.2*yd, ylims(2) + 0.2*yd  ]); 
+
+end 
+
+function U = comp_U(rv) 
+
+global mu J2 RE 
+
+x = rv(1); 
+y = rv(2); 
+z = rv(3); 
+
+% radius 
+r = sqrt(x^2 + y^2 + z^2); 
+
+% U point mass 
+Up = mu/r; 
+
+% latitude 
+phi = asin(z/r); 
+
+% U J2 
+UJ2 = -mu/r * J2 * (RE/r)^2 * ( 3/2 * ( sin(phi) )^2 - 1/2 ); 
+
+% U point mass 
+U = Up + UJ2; 
+
+end 
+
+function Tp = perigee_pass(oe, x) 
+
+global mu 
+
+% perigee passing 
+a = oe(1); 
+e = oe(2); 
+nu = oe(6); 
+%     r = norm([ x_pJ2(i,1) x_pJ2(i,2) x_pJ2(i,3) ]); 
+r = sqrt( x(1)^2 + x(2)^2 + x(3)^2 ); 
+
+n = sqrt(mu/a^3); 
+E = acos( r/a * cos(nu) + e );
+M = E - e*sin(E); 
+Tp = M/n; 
+
+end 
+
+
+
 \end{lstlisting}
 
 \subsection*{rv2oe function}
 
 \begin{lstlisting}[basicstyle=\footnotesize]
-function oe = rv2oe(rv)
+function [oe, Tp] = rv2oe(rv)
 % ------------------------------------------------------------------------
 % Inputs 
-%   rv = [6x1] position and velocity states vector 
+%   rv = [6x1] position and velocity states vector in ECI frame 
 % 
 % Outputs 
 %   oe = [6x1] orbital elements: a, e, i, w, Omega, nu
-%           a       = semimajor axis 
-%           e       = eccentricity 
-%           i       = inclination 
-%           w       = argument of perigee 
-%           Omega   = right ascension of ascending node 
-%           nu      = true anomaly 
+%           a   = semimajor axis 
+%           e   = eccentricity 
+%           i   = inclination 
+%           w   = argument of perigee 
+%           O   = right ascension of ascending node 
+%           M   = mean anomaly 
+%           Tp  = time of perigee passing  (optional output) 
 % ------------------------------------------------------------------------
 
 global mu 
@@ -458,15 +832,15 @@ i = acos(h(3)/norm(h));
 
 % right ascension of ascending node (check for equatorial orbit) 
 if i > 0.000001
-Omega = acos( nhat(1)/norm(nhat) ); 
+O = acos( nhat(1)/norm(nhat) ); 
 else
-Omega = 0; 
+O = 0; 
 end
-if isnan(Omega)
-Omega = 0; 
+if isnan(O)
+O = 0; 
 end
 if nhat(2)<0
-Omega = 2*pi - Omega; 
+O = 2*pi - O; 
 end
 
 % argument of perigee 
@@ -488,7 +862,20 @@ nu = acos( dot(evec,r) / (e*norm(r)) );
 %    nu = 360 - nu
 % end
 
-oe = [a; e; i; w; Omega; nu]; 
+%Apply Quadrant Checks to All Determined Angles
+% idx = nhat(2) < 0; if any(idx); O(idx) = 2*pi - O(idx);  end
+% idx = evec(3) < 0; if any(idx); w(idx) = 2*pi - w(idx); end
+idx = dot(r,v) < 0; if any(idx); nu(idx) = 2*pi - nu(idx); end
+
+oe = [a; e; i; w; O; nu]; 
+
+% perigee passing time 
+
+rnorm = norm(r); 
+n = sqrt(mu/a^3); 
+E = acos( rnorm/a * cos(nu) + e );
+M = E - e*sin(E); 
+Tp = M/n; 
 
 end
 \end{lstlisting}
@@ -579,6 +966,128 @@ function E = kepler(M, e)
 f = @(E) E - e * sin(E) - M;
 E = fzero(f, M);  % <-- I would use M as the initial guess instead of 0
 end
+\end{lstlisting}
+
+\subsection*{Integrated Equations of Motion} 
+
+\begin{lstlisting}
+
+function dx = TwoBod_6states(t, x)
+% ------------------------------------------------------------------------
+% Inputs 
+%   t = [Nx1] time vector (orbit is Keplerian, doesn't matter) 
+%   x = [6x1] state vector 
+% 
+% Outputs 
+%   dx = [6x1] derivative of state vector 
+% ------------------------------------------------------------------------
+
+global mu 
+
+dx = zeros(6, 1);   % force column vector 
+
+dx(1:3) = x(4:6); 
+% r_norm  = sqrt( x(1)^2 + x(2)^2 + x(3)^2 ); 
+r_norm  = norm(x(1:3)); 
+dx(4:6) = ( - mu / r_norm^3 ) * x(1:3); 
+
+end 
+
+function dx = TwoBod_UJ2(t, x)
+% ------------------------------------------------------------------------
+% Inputs 
+%   t = [Nx1] time vector (orbit is Keplerian, doesn't matter) 
+%   x = [6x1] state vector 
+% 
+% Outputs 
+%   dx = [6x1] derivative of state vector 
+% ------------------------------------------------------------------------
+
+global mu J2 RE 
+
+dx = zeros(6, 1);   % force column vector 
+
+dx(1:3) = x(4:6); 
+% r_norm  = sqrt( x(1)^2 + x(2)^2 + x(3)^2 ); 
+r_norm  = norm(x(1:3)); 
+dx(4:6) = ( - mu / r_norm^3 ) * x(1:3); 
+
+% J2 stuff 
+dUx =      -(3*J2*RE^2*mu*x(1)*(x(1)^2 + x(2)^2 - 4*x(3)^2)) / (2*(x(1)^2 + x(2)^2 + x(3)^2)^(7/2)); 
+dUy =      -(3*J2*RE^2*mu*x(2)*(x(1)^2 + x(2)^2 - 4*x(3)^2)) / (2*(x(1)^2 + x(2)^2 + x(3)^2)^(7/2)); 
+dUz =  -(3*J2*RE^2*mu*x(3)*(3*x(1)^2 + 3*x(2)^2 - 2*x(3)^2)) / (2*(x(1)^2 + x(2)^2 + x(3)^2)^(7/2)); 
+
+dx(4:6) = dx(4:6) + [dUx; dUy; dUz]; 
+
+end 
+
+function dx = TwoBod_UJ2(t, x)
+% ------------------------------------------------------------------------
+% Inputs 
+%   t = [Nx1] time vector (orbit is Keplerian, doesn't matter) 
+%   x = [6x1] state vector 
+% 
+% Outputs 
+%   dx = [6x1] derivative of state vector 
+% ------------------------------------------------------------------------
+
+global mu J2 RE 
+global CD A m p0 r0_drag H dtheta 
+
+dx = zeros(6, 1);   % force column vector 
+
+dx(1:3) = x(4:6); 
+% r_norm  = sqrt( x(1)^2 + x(2)^2 + x(3)^2 ); 
+rnorm  = norm(x(1:3)); 
+dx(4:6) = ( - mu / rnorm^3 ) * x(1:3); 
+
+% drag stuff 
+pA = p0 * exp( -(rnorm - r0_drag)/H ); 
+V_A = [dx(4) + dtheta * dx(2); dx(5) - dtheta * dx(1); dx(6)]; 
+VA = sqrt( ( dx(4) + dtheta * dx(2) )^2 + ( dx(5) - dtheta * dx(1) )^2 + dx(6)^2 ); 
+
+ddx_drag = - 1/2 * CD * A/m * pA * VA * V_A; 
+dx(4:6) = dx(4:6) + ddx_drag; 
+
+end 
+
+function dx = TwoBod_UJ2(t, x)
+% ------------------------------------------------------------------------
+% Inputs 
+%   t = [Nx1] time vector (orbit is Keplerian, doesn't matter) 
+%   x = [6x1] state vector 
+% 
+% Outputs 
+%   dx = [6x1] derivative of state vector 
+% ------------------------------------------------------------------------
+
+global mu J2 RE 
+global CD A m p0 r0_drag H dtheta 
+
+dx = zeros(6, 1);   % force column vector 
+
+dx(1:3) = x(4:6); 
+% r_norm  = sqrt( x(1)^2 + x(2)^2 + x(3)^2 ); 
+rnorm  = norm(x(1:3)); 
+dx(4:6) = ( - mu / rnorm^3 ) * x(1:3); 
+
+% J2 stuff 
+dUx =      -(3*J2*RE^2*mu*x(1)*(x(1)^2 + x(2)^2 - 4*x(3)^2)) / (2*(x(1)^2 + x(2)^2 + x(3)^2)^(7/2)); 
+dUy =      -(3*J2*RE^2*mu*x(2)*(x(1)^2 + x(2)^2 - 4*x(3)^2)) / (2*(x(1)^2 + x(2)^2 + x(3)^2)^(7/2)); 
+dUz =  -(3*J2*RE^2*mu*x(3)*(3*x(1)^2 + 3*x(2)^2 - 2*x(3)^2)) / (2*(x(1)^2 + x(2)^2 + x(3)^2)^(7/2)); 
+
+dx(4:6) = dx(4:6) + [dUx; dUy; dUz]; 
+
+% drag stuff 
+pA = p0 * exp( -(rnorm - r0_drag)/H ); 
+V_A = [dx(4) + dtheta * dx(2); dx(5) - dtheta * dx(1); dx(6)]; 
+VA = sqrt( ( dx(4) + dtheta * dx(2) )^2 + ( dx(5) - dtheta * dx(1) )^2 + dx(6)^2 ); 
+
+ddx_drag = - 1/2 * CD * A/m * pA * VA * V_A; 
+dx(4:6) = dx(4:6) + ddx_drag; 
+
+end 
+	
 \end{lstlisting}
 
 % ================================================================ % 

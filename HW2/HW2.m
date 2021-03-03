@@ -4,6 +4,9 @@
 
 clear; 
 
+positionA = [100 100 600 600]; 
+positionB = [100 100 700 900]; 
+
 %% Problem 1 
 
 syms x y z 
@@ -48,31 +51,32 @@ rv_check2 = oe2rv(oe0);
 % a = oe(1); 
 % T = abs(2 * pi * sqrt(a^3 / mu));        % period 
 T = 60 * 60 * 24; 
+dt = 20; 
 
 % set ode45 params 
-rel_tol = 1e-14;         % 1e-14 accurate; 1e-6 coarse 
+rel_tol = 3e-14;         % 1e-14 accurate; 1e-6 coarse 
 abs_tol = 1e-16; 
 options = odeset('reltol', rel_tol, 'abstol', abs_tol ); 
 
 % INTEGRATE! Point mass and J2 
-[t_p, x_p] = ode45(@TwoBod_6states, [0 T], [r0; v0], options); 
-[t_pJ2, x_pJ2] = ode45(@TwoBod_UJ2, [0 T], [r0; v0], options); 
+[t_p, x_p] = ode45(@TwoBod_6states, [0:dt:T], [r0; v0], options); 
+[t_J2, x_J2] = ode45(@TwoBod_UJ2, [0:dt:T], [r0; v0], options); 
 
 % ------------------------------------------------------------------------
 
-name = 'Problem 1: 2-Body EOM Orbit'; 
-h = figure('name', name); 
+name = 'Problem 1 - 2-Body EOM Orbit'; 
+h = figure('name', name, 'position', positionA + [50 0 0 0]); 
 
     x = x_p; 
     plot3(x(:,1), x(:,2), x(:,3)); hold on; grid on; 
-    x = x_pJ2; 
+    x = x_J2; 
     plot3(x(:,1), x(:,2), x(:,3)); hold on; grid on; 
     
     x = x_p; 
     plot3(x(1,1), x(1,2), x(1,3), 'mo')
     plot3(x(end,1), x(end,2), x(end,3), 'cx') 
     
-    x = x_pJ2; 
+    x = x_J2; 
     plot3(x(1,1), x(1,2), x(1,3), 'mo')
     plot3(x(end,1), x(end,2), x(end,3), 'cx') 
     
@@ -84,31 +88,24 @@ h = figure('name', name);
 %     legend('orbit', 'start', 'end')
     
     sgtitle(name) 
+save_pdf(h, name); 
 
 %% problem 1b 
 
-clear oe oe_check oe_p 
-
-for i = 1:length(x_pJ2)
-    oe_pJ2(i,:) = rv2oe( x_pJ2(i, :) ); 
-    oe_check(i,:) = rv2orb_OG( x_pJ2(i, :) ); 
-    
-    % perigee passing 
-    a = oe_pJ2(1); 
-    e = oe_pJ2(2); 
-    nu = oe_pJ2(6); 
-    r = norm([ x_pJ2(i,1) x_pJ2(i,2) x_pJ2(i,3) ]); 
-    
-    n = sqrt(mu/a^3); 
-    E = acos( r/a * cos(nu) + e );
-    M = E - e*sin(E); 
-    Tp(i,:) = M/n; 
-    
-end 
+clear oe oe_check oe_p Tp_p Tp_pJ2 oe_pJ2 
 
 for i = 1:length(x_p) 
-    oe_p(i, :) = rv2oe( x_p(i, :) ); 
+    [oe_p(i, :), Tp_p(i,:)] = rv2oe( x_p(i, :) ); 
     oe_check(i, :) = rv2orb_OG( x_p(i, :) ); 
+%     Tp_p(i,:) = perigee_pass(oe_p(i,:), x_p(i,:)); 
+end 
+
+
+for i = 1:length(x_J2)
+    oe_J2(i,:) = rv2oe( x_J2(i, :) ); 
+    oe_check(i,:) = rv2orb_OG( x_J2(i, :) ); 
+    
+    Tp_J2(i,:) = perigee_pass(oe_J2(i,:), x_J2(i,:)); 
 end 
 
 % Time of perigee passage 
@@ -119,23 +116,29 @@ end
 
 % ------------------------------------------------------------------------
 
-labels = {'a', 'e', 'i', '\omega', '\Omega', '\nu'}; 
+labels = {'a', 'e', 'i', '\omega', '\Omega', 'T_p'}; 
 units = {'km', '', 'rad', 'rad', 'rad', 'rad'}; 
-name = 'Problem 1b: Orbital Elements'; 
-h = figure('name', name); 
+name = 'Problem 1b - Orbital Elements'; 
+h = figure('name', name, 'position', positionB + [50 0 0 0]); 
 for i = 1:5
-    subplot(5,1,i) 
-    plot(t_pJ2, oe_pJ2(:, i)); hold on; grid on; 
-    plot(t_p, oe_p(:, i)); 
-    title(labels{i}); 
-    ylabel(units{i}); 
-    increase_ylim; 
-    if i == 1
-        legend('with J2', 'point mass'); 
-    end 
+    subplot(6,1,i) 
+        plot(t_J2, oe_J2(:, i)); hold on; grid on; 
+        plot(t_p, oe_p(:, i)); 
+        title(labels{i}); 
+        ylabel(units{i}); 
+        increase_ylim; 
+        if i == 1
+            legend('with J2', 'point mass'); 
+        end 
 end 
+    subplot(6,1,6) 
+        plot(t_J2, Tp_J2); hold on; grid on; 
+        plot(t_p, Tp_p); 
+        title('T_p') 
+        ylabel('s') 
 sgtitle(name) 
 xlabel('Time (sec)') 
+save_pdf(h, name); 
 
 %% Problem 1c: energy 
 
@@ -146,13 +149,13 @@ clear dE
 clear dh 
 clear dhnorm 
 
-for i = 1:length(x_pJ2)
+for i = 1:length(x_J2)
     
-    U(:,i) = comp_U(x_pJ2(i, 1:3)); 
-    vnorm(:,i) = sqrt( x_pJ2(i,4)^2 + x_pJ2(i,5)^2 + x_pJ2(i,6)^2 ); 
+    U(:,i) = comp_U(x_J2(i, 1:3)); 
+    vnorm(:,i) = sqrt( x_J2(i,4)^2 + x_J2(i,5)^2 + x_J2(i,6)^2 ); 
     E(:,i) = vnorm(:,i)^2 / 2 - U(:,i); 
-    a = [ x_pJ2(i,1), x_pJ2(i,2), x_pJ2(i,3) ]; 
-    b = [ x_pJ2(i,4), x_pJ2(i,5), x_pJ2(i,6) ]; 
+    a = [ x_J2(i,1), x_J2(i,2), x_J2(i,3) ]; 
+    b = [ x_J2(i,4), x_J2(i,5), x_J2(i,6) ]; 
     h_mom(:,i) = cross( a , b ); 
     
     dE(:,i) = E(i) - E(1); 
@@ -163,30 +166,213 @@ end
 
 % ------------------------------------------------------------------------
 
-name = 'Problem 1c: Delta Specific Energy'; 
-h = figure('name', name); 
-    plot(t_pJ2, dE); 
+name = 'Problem 1c - Delta Specific Energy'; 
+h = figure('name', name, 'position', positionA + [50 0 0 0]); 
+    plot(t_J2, dE); 
     title( 'dE = E(t) - E(t_0)' ) 
     xlabel('Time (s)') 
-    ylabel('km^2/s') 
+    ylabel('km^2/s^2') 
+save_pdf(h, name); 
     
     
 %% Problem 1d: angular momentum 
 
 
-name = 'Problem 1d: Delta Angular Momentum'; 
-h = figure('name', name); 
-    plot(t_pJ2, dh(3, :)); 
+name = 'Problem 1d - Delta Angular Momentum'; 
+h = figure('name', name, 'position', positionA + [50 0 0 0]); 
+    plot(t_J2, dh(3, :)); 
     title( 'dh_k = h_k(t) - h_k(t_0)' ) 
     xlabel('Time (s)') 
+    ylabel('km^2/s') 
+save_pdf(h, name); 
+    
+
+%% Problem 2: DRAG 
+
+global CD A m p0 r0_drag H dtheta 
+
+CD = 2; 
+A = 3.6e-6; % --> km^2 
+m = 1350; 
+p0 = 4e-4; % --> -13 --> -4, multiply 1e9 when going 1/m^3 to 1/km^3  
+r0_drag = 7298.145; 
+H = 200; 
+dtheta = 7.29211585530066e-5; 
+
+% set 1 day period (again just in case) 
+T = 60 * 60 * 24; 
+
+% set ode45 params 
+rel_tol = 3e-14;         % 1e-14 accurate; 1e-6 coarse 
+abs_tol = 1e-16; 
+options = odeset('reltol', rel_tol, 'abstol', abs_tol ); 
+
+% INTEGRATE! Point mass and J2 and drag 
+[t_J2drag, x_J2drag] = ode45(@TwoBod_UJ2_drag, [0:dt:T], [r0; v0], options); 
+
+% INTEGRATE! Point mass and drag 
+[t_drag, x_drag] = ode45(@TwoBod_drag, [0:dt:T], [r0; v0], options); 
+
+
+%% Problem 2a: specific energy 
+
+
+clear vnorm 
+clear h 
+clear h_mom 
+clear dE 
+clear dh 
+clear dhnorm 
+
+for i = 1:length(x_J2drag)
+    
+    U(:,i) = comp_U(x_J2drag(i, 1:3)); 
+    vnorm(:,i) = sqrt( x_J2drag(i,4)^2 + x_J2drag(i,5)^2 + x_J2drag(i,6)^2 ); 
+    E(:,i) = vnorm(:,i)^2 / 2 - U(:,i); 
+    a = [ x_J2drag(i,1), x_J2drag(i,2), x_J2drag(i,3) ]; 
+    b = [ x_J2drag(i,4), x_J2drag(i,5), x_J2drag(i,6) ]; 
+    h_mom(:,i) = cross( a , b ); 
+    
+    dE(:,i) = E(i) - E(1); 
+    dh(:,i) = h_mom(:,i) - h_mom(:,1); 
+    dhnorm(:,i) = norm( dh(:,i) ); 
+    
+end 
+
+% ------------------------------------------------------------------------
+
+name = 'Problem 2a - Delta Specific Energy'; 
+h = figure('name', name, 'position', positionA + [50 0 0 0]); 
+    plot(t_J2drag, dE); 
+    title( 'dE = E(t) - E(t_0)' ) 
+    xlabel('Time (s)') 
     ylabel('km^2/s^2') 
+save_pdf(h, name); 
     
-
-%% Problem 2
-
+%% Problem 2b: orbital elements 
 
 
+clear oe_drag Tp_drag 
+
+for i = 1:length(x_drag) 
+    [oe_drag(i, :), Tp_drag(i,:)] = rv2oe( x_drag(i, :) ); 
+    oe_check(i, :) = rv2orb_OG( x_p(i, :) ); 
+%     Tp_p(i,:) = perigee_pass(oe_p(i,:), x_p(i,:)); 
+end 
+
+for i = 1:length(x_J2drag) 
+    [oe_J2drag(i, :), Tp_J2drag(i,:)] = rv2oe( x_J2drag(i, :) ); 
+    oe_check(i, :) = rv2orb_OG( x_p(i, :) ); 
+end 
+
+% ------------------------------------------------------------------------
+
+labels = {'a', 'e', 'i', '\omega', '\Omega', 'T_p'}; 
+units = {'km', '', 'rad', 'rad', 'rad', 'rad'}; 
+name = 'Problem 2b - Orbital Elements'; 
+h = figure('name', name, 'position', positionB + [50 0 0 0]); 
+for i = 1:5
+    subplot(6,1,i) 
+        plot(t_J2drag, oe_J2drag(:,i)); hold on; grid on;
+        plot(t_J2, oe_J2(:, i));  
+        plot(t_drag, oe_drag(:, i)); 
+        plot(t_p, oe_p(:, i)); 
+        title(labels{i}); 
+        ylabel(units{i}); 
+        increase_ylim; 
+        if i == 1
+            legend('J2 + drag', 'J2', 'drag', 'point mass'); 
+        end 
+end 
+    subplot(6,1,6) 
+        plot(t_J2drag, Tp_J2drag); hold on; grid on; 
+        plot(t_J2, Tp_J2); 
+        plot(t_drag, Tp_drag); 
+        plot(t_p, Tp_p); 
+        title('T_p') 
+        ylabel('s') 
+sgtitle(name) 
+xlabel('Time (sec)') 
+save_pdf(h, name); 
+
+
+
+%% ------------------------------------------------------------------------
+% differences in orbital elements 
+
+% 6 combinations: 
+% (1) p - J2 
+% (2) p - drag 
+% (3) p - J2drag 
+% (4) J2 - drag 
+% (5) J2 - J2drag 
+% (6) drag - J2drag 
+
+% add Tp, make your life easier 
+
+oe_p = [oe_p, Tp_p]; 
+oe_J2 = [oe_J2, Tp_J2]; 
+oe_J2drag = [oe_J2drag, Tp_J2drag]; 
+oe_drag = [oe_drag, Tp_drag]; 
+
+p_J2 = oe_p - oe_J2; 
+p_drag = oe_p - oe_drag; 
+p_J2drag = oe_p - oe_J2drag; 
+J2_drag = oe_J2 - oe_drag; 
+J2_J2drag = oe_J2 - oe_J2drag; 
+J2drag_J2 = oe_J2drag - oe_J2; 
+drag_J2drag = oe_drag - oe_J2drag; 
+
+labels = {'a', 'e', 'i', '\omega', '\Omega', 'T_p', 'T_p'}; 
+units = {'km', '', 'rad', 'rad', 'rad', 'rad', 's'}; 
+name = 'Problem 2b - Orbital Elements Point Mass Diff'; 
+h = figure('name', name, 'position', positionB + [50 0 0 0]); 
+for i = 1:6
+    subplot(6,1,i) 
+        plot(t_J2, p_J2(:,i)); hold on; grid on; 
+        plot(t_J2, p_drag(:,i));
+        plot(t_J2, p_J2drag(:,i)); 
     
+        title(labels{i}); 
+        ylabel(units{i}); 
+        increase_ylim; 
+        if i == 1
+            legend('p-J2', 'p-drag', 'p-J2drag'); 
+        end 
+end 
+sgtitle(name) 
+xlabel('Time (sec)') 
+save_pdf(h, name); 
+
+%% 
+
+
+labels = {'a', 'e', 'i', '\omega', '\Omega', 'T_p', 'T_p'}; 
+units = {'km', '', 'rad', 'rad', 'rad', 'rad', 's'}; 
+name = 'Problem 2b - Orbital Elements J2 and Drag Diff'; 
+h = figure('name', name, 'position', positionB + [50 0 0 0]); 
+for i = 1:6
+    subplot(6,1,i) 
+%         plot(t_J2, J2_drag(:,i)); hold on; grid on; 
+        plot(t_J2, J2_J2drag(:,i)); 
+%         plot(t_J2, J2drag_J2(:,i)); 
+%         plot(t_J2, drag_J2drag(:,i)); 
+    
+        title(labels{i}); 
+        ylabel(units{i}); 
+        increase_ylim; 
+        if i == 1
+%             legend('J2-drag', 'J2-J2drag', 'drag-J2drag'); 
+            legend('2BJ2drag - 2BJ2') 
+        end 
+end 
+sgtitle(name) 
+xlabel('Time (sec)') 
+save_pdf(h, name); 
+
+
+
+%%     
 %% subfunctions 
 
 function save_pdf(h, name) 
@@ -229,6 +415,24 @@ UJ2 = -mu/r * J2 * (RE/r)^2 * ( 3/2 * ( sin(phi) )^2 - 1/2 );
 
 % U point mass 
 U = Up + UJ2; 
+
+end 
+
+function Tp = perigee_pass(oe, x) 
+
+global mu 
+
+    % perigee passing 
+    a = oe(1); 
+    e = oe(2); 
+    nu = oe(6); 
+%     r = norm([ x_pJ2(i,1) x_pJ2(i,2) x_pJ2(i,3) ]); 
+    r = sqrt( x(1)^2 + x(2)^2 + x(3)^2 ); 
+        
+    n = sqrt(mu/a^3); 
+    E = acos( r/a * cos(nu) + e );
+    M = E - e*sin(E); 
+    Tp = M/n; 
 
 end 
 
