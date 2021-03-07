@@ -10,7 +10,7 @@ function [oe, Tp] = rv2oe(rv)
 %           i   = inclination 
 %           w   = argument of perigee 
 %           O   = right ascension of ascending node 
-%           M   = mean anomaly 
+%           nu  = true anomaly 
 %           Tp  = time of perigee passing  (optional output) 
 % ------------------------------------------------------------------------
 
@@ -80,6 +80,13 @@ nu = acos( dot(evec,r) / (e*norm(r)) );
 % idx = nhat(2) < 0; if any(idx); O(idx) = 2*pi - O(idx);  end
 % idx = evec(3) < 0; if any(idx); w(idx) = 2*pi - w(idx); end
 idx = dot(r,v) < 0; if any(idx); nu(idx) = 2*pi - nu(idx); end
+
+% RAAN = atan2d(h(1),-h(2));
+% 
+% ArgLat --> arg of perigee
+% ArgLat = atan2d(R0(3)/sind(i),R0(1)*cosd(RAAN) + R0(2)*sind(RAAN));
+% 
+% TA = atan2d(sqrt((a*(1-e^2))/(mu))*dot(V0,R0),(a*(1-e^2))-norm(R0));
 
 oe = [a; e; i; w; O; nu]; 
 

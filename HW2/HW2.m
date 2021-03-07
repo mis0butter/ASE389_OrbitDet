@@ -252,7 +252,7 @@ save_pdf(h, name);
 %% Problem 2b: orbital elements 
 
 
-clear oe_drag Tp_drag 
+clear oe_drag oe_J2drag Tp_drag 
 
 for i = 1:length(x_drag) 
     [oe_drag(i, :), Tp_drag(i,:)] = rv2oe( x_drag(i, :) ); 
@@ -354,8 +354,8 @@ h = figure('name', name, 'position', positionB + [50 0 0 0]);
 for i = 1:6
     subplot(6,1,i) 
 %         plot(t_J2, J2_drag(:,i)); hold on; grid on; 
-        plot(t_J2, J2_J2drag(:,i)); 
-%         plot(t_J2, J2drag_J2(:,i)); 
+%         plot(t_J2, -J2_J2drag(:,i)); 
+        plot(t_J2, J2drag_J2(:,i)); 
 %         plot(t_J2, drag_J2drag(:,i)); 
     
         title(labels{i}); 

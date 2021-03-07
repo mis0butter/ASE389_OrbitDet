@@ -27,8 +27,9 @@ dx(4:6) = dx(4:6) + [dUx; dUy; dUz];
 
 % drag stuff 
 pA = p0 * exp( -(rnorm - r0_drag)/H ); 
-V_A = [dx(4) + dtheta * dx(2); dx(5) - dtheta * dx(1); dx(6)]; 
-VA = sqrt( ( dx(4) + dtheta * dx(2) )^2 + ( dx(5) - dtheta * dx(1) )^2 + dx(6)^2 ); 
+V_A = [x(4) + dtheta * x(2); x(5) - dtheta * x(1); x(6)]; 
+VA = norm(V_A); 
+% VA = sqrt( ( dx(4) + dtheta * dx(2) )^2 + ( dx(5) - dtheta * dx(1) )^2 + dx(6)^2 ); 
 
 ddx_drag = - 1/2 * CD * A/m * pA * VA * V_A; 
 dx(4:6) = dx(4:6) + ddx_drag; 
