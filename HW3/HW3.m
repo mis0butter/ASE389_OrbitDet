@@ -31,12 +31,11 @@ rel_tol = 3e-14;         % 1e-14 accurate; 1e-6 coarse
 abs_tol = 1e-16; 
 options = odeset('reltol', rel_tol, 'abstol', abs_tol ); 
 
-r0 = [1; 0]; 
-v0 = [0; 1]; 
+rv0 = [1; 0; 0; 1]; 
 dt = 0.01; 
 
 % integrate 
-[t, x] = ode45(@fn.TwoBod_4states, [0:dt:100], [r0;v0], options); 
+[t, rv] = ode45(@fn.TwoBod_4states, [0:dt:100], [rv0], options); 
 
 %% Problem 1b: 
 % Perturb the previous set of initial conditions by an amount
@@ -44,17 +43,16 @@ dt = 0.01;
 % (notice that the perturbation is subtracted!), where 
 % δX(t0) = [1e-6; -1e-6; 1e-6; 1e-6] 
 
-dr0 = [1e-6; -1e-6]; 
-dv0 = [1e-6; 1e-6]; 
+drv0 = [1e-6; -1e-6; 1e-6; 1e-6]; 
 STM0 = eye(4); 
 STM0 = reshape(STM0, [16 1]); 
 
-rvSTM0 = [r0 - dr0; v0 - dv0; STM0]; 
+rvSTM0 = [rv0 - drv0; STM0]; 
 
 % integrate 
-[tstar, xstar] = ode45(@fn.TwoBod_4states_STM, [0:dt:100], [rvSTM0], options); 
+[tstar, rvstar] = ode45(@fn.TwoBod_4states_STM, [0:dt:100], [rvSTM0], options); 
 
-STMf = xstar(end, 5:20); 
+STMf = rvstar(end, 5:20); 
 STMf = reshape(STMf, [4 4]); 
 
 %% Problem 1c: 
@@ -79,6 +77,25 @@ STMfinv * STMf
 % and compare the results of (1) and (2). Provide the numeric results of (1) and (2) at t1 and
 % t10 in the write-up, along with δX(ti) − Φ(ti, t0)δX(t0). How closely do they compare?
 
+% t1 = 10 TU
+i = 10 / dt + 1; 
+STMi = rvstar(i, 5:20); 
+STMi = reshape(STMi, [4 4]); 
+
+drv1 = rv(i,:) - rvstar(i,1:4); 
+drv2 = STMi * drv0; 
+
+ddrvt1 = drv1' - drv2; 
+
+% t10 = 100 TU
+i = 100 / dt + 1; 
+STMi = rvstar(i, 5:20); 
+STMi = reshape(STMi, [4 4]); 
+
+drv1 = rv(i,:) - rvstar(i,1:4); 
+drv2 = STMi * drv0; 
+
+ddrvt10 = drv1' - drv2; 
 
 
 %%     
