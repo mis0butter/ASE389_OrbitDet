@@ -1,0 +1,36 @@
+% ASE 389 Orbit Determination
+% HW 2
+% Junette Hsin 
+
+clear; 
+
+% positionA = [100 100 600 600]; 
+% positionB = [100 100 700 900]; 
+
+%% Problem 1: 
+% Assume an orbit plane coordinate system with a gravitational parameter of 1, i.e., µ = 1. The
+% equations of motion are:
+% ddx = - x / r^3
+% ddy = - y / r^3 
+% r^2 = x^2 + y^2 
+
+global mu 
+mu = 1; 
+
+% set ode45 params 
+rel_tol = 3e-14;         % 1e-14 accurate; 1e-6 coarse 
+abs_tol = 1e-16; 
+options = odeset('reltol', rel_tol, 'abstol', abs_tol ); 
+
+r0 = [1; 0]; 
+v0 = [0; 1]; 
+dt = 0.01; 
+
+% integrate 
+[t_p, x_p] = ode45(@TwoBod_4states, [0], [r0; v0], options); 
+
+
+%%     
+%% subfunctions 
+
+
