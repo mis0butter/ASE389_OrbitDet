@@ -33,8 +33,8 @@ drv(3:4) = ( - mu / r^3 ) * [x; y];
 
 %% STM stuff 
 
-G = [ -mu/r^3 + 3*mu*x^2/r^5, 3*mu*x*y/r^5; ... 
-      3*mu*x*y/r^5,           -mu/r^3 + 3*mu*y^2 / r^5  ]; 
+G = [ -mu/r^3 + 3*mu*x^2/r^5 , 3*mu*x*y/r^5            ; ... 
+      3*mu*x*y/r^5           , -mu/r^3 + 3*mu*y^2/r^5  ]; 
   
 K = zeros(2,2); 
 

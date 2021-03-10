@@ -97,6 +97,35 @@ drv2 = STMi * drv0;
 
 ddrvt10 = drv1' - drv2; 
 
+%% Problem 2a: Given the observation state relation y = H x + eps, where x is a scalar and
+% y = [1; 2; 1]
+% W = [2 0 0; 0 1 0; 0 0 1]; 
+% H = [1; 1; 1]; 
+% with a priori information xbar = 2 and Wbar = 2:
+% 
+% a. Using the batch processing algorithm, what is xˆ? In the write-up, outline the method
+% employed in the code.
+
+% W matrix is inv(R) 
+% Wbar = inv(P) 
+
+% observation states 
+y = [1; 2; 1]; 
+W = [2 0 0; 0 1 0; 0 0 1]; 5
+H = [1; 1; 1]; 
+
+xbar = 2; 
+Wbar = 2; 
+
+P = inv(Wbar); % Lambda? 
+R = inv(W); 
+
+xhat = inv(H'*inv(R)*H + inv(P)) * H'*inv(R)*y + inv(P)*xbar; 
+
+%% Problem 2b: What is the best estimate of the observation error, eps? 
+
+e = y - H*xhat; 
+
 
 %%     
 %% subfunctions 
