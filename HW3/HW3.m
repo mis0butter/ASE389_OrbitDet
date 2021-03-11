@@ -97,13 +97,13 @@ drv2 = STMi * drv0;
 
 ddrvt10 = drv1' - drv2; 
 
-%% Problem 2a: Given the observation state relation y = H x + eps, where x is a scalar and
+%% Problem 2: Given the observation state relation y = H x + eps, where x is a scalar and
 % y = [1; 2; 1]
 % W = [2 0 0; 0 1 0; 0 0 1]; 
 % H = [1; 1; 1]; 
 % with a priori information xbar = 2 and Wbar = 2:
 % 
-% a. Using the batch processing algorithm, what is xˆ? In the write-up, outline the method
+% Problem 2a: Using the batch processing algorithm, what is xˆ? In the write-up, outline the method
 % employed in the code.
 
 % W matrix is inv(R) 
@@ -111,16 +111,44 @@ ddrvt10 = drv1' - drv2;
 
 % observation states 
 y = [1; 2; 1]; 
-W = [2 0 0; 0 1 0; 0 0 1]; 5
+W = [2 0 0; 0 1 0; 0 0 1]; 
 H = [1; 1; 1]; 
 
-xbar = 2; 
-Wbar = 2; 
+x0 = 2; 
+W0 = 2; 
 
-P = inv(Wbar); % Lambda? 
-R = inv(W); 
+% Lambda = inv(P) = W0  
+P0      = inv(W0); 
+Lambda  = W0; 
+R       = inv(W); 
 
-xhat = inv(H'*inv(R)*H + inv(P)) * H'*inv(R)*y + inv(P)*xbar; 
+% N = inv(P) * x0 = W0 * x0 
+N = W0 * x0; 
+
+% accumulate 
+Lambda  = Lambda + H' * W * H; 
+N       = N + H' * W * y; 
+
+% normal equation 
+xhat = inv(Lambda) * N; 
+
+% xhat = inv(H'*inv(R)*H + inv(P)) * H'*inv(R)*y + inv(P)*x0; 
+% xhat = inv(H' * W * H + W0) * H' * W + W0*x0; 
+
+%%
+
+x0 = 2;
+W0 = 2; % Pinv
+W = [2 0 0;0 1 0;0 0 1]; % Rinv
+H = [1 1 1]';
+
+lambda = W0;
+N = W0*x0;
+y = [1 2 1]';
+lambda = lambda + H'*W*H;
+N = N + H'*W*y;
+xhat = N/lambda;
+eps = y - H*xhat;
 
 %% Problem 2b: What is the best estimate of the observation error, eps? 
 
