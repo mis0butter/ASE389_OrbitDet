@@ -28,7 +28,7 @@
 %--------------------------------------------------------------------------
 function GAST = JD2GAST(JD)
 %THETAm is the mean siderial time in degrees
-THETAm = JD2GMST(JD);
+THETAm = fn.JD2GMST(JD);
 
 %Compute the number of centuries since J2000
 T = (JD - 2451545.0)./36525;
