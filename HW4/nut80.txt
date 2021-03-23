@@ -1,27 +1,3 @@
-%--------------------------------------------------------------------------
-%
-% NutAngles: Nutation in longitude and obliquity
-%
-% Input:
-%   Mjd_TT    Modified Julian Date (Terrestrial Time)
-%
-% Output:
-%   dpsi, deps
-%
-% Last modified:   2018/01/27   M. Mahooti
-%
-%--------------------------------------------------------------------------
-function [dpsi, deps] = NutAngles(Mjd_TT)
-
-global const
-
-jd_TT = Mjd_TT + 2400000.5; 
-T  = (Mjd_TT-const.MJD_J2000)/36525;
-T2 = T*T;
-T3 = T2*T;
-rev = 360*3600;  % arcsec/revolution
-
-N_coeff = 106;
 C = [
   % l  l' F  D Om    dpsi    *T     deps     *T
     0, 0, 0, 0, 1,-1719960,-1742,  920250,   89 ;   %   1
@@ -131,39 +107,3 @@ C = [
     0, 0, 2, 4, 2,     -10,    0,       0,    0 ;   % 105
     0, 1, 0, 1, 0,      10,    0,       0,    0     % 106
  ];
-
-% Mean arguments of luni-solar motion
-
-%   l   mean anomaly of the Moon
-%   l'  mean anomaly of the Sun
-%   F   mean argument of latitude
-%   D   mean longitude elongation of the Moon from the Sun 
-%   Om  mean longitude of the ascending node  
-l  = mod (  485866.733 + (1325.0*rev +  715922.633)*T ...   
-                               + 31.310*T2 + 0.064*T3, rev );
-lp = mod ( 1287099.804 + (  99.0*rev + 1292581.224)*T ...            
-                               -  0.577*T2 - 0.012*T3, rev );
-F  = mod (  335778.877 + (1342.0*rev +  295263.137)*T ...   
-                               - 13.257*T2 + 0.011*T3, rev );
-D  = mod ( 1072261.307 + (1236.0*rev + 1105601.328)*T ...   
-                               -  6.891*T2 + 0.019*T3, rev );
-Om = mod (  450160.280 - (   5.0*rev +  482890.539)*T ...   
-                               +  7.455*T2 + 0.008*T3, rev );
-                           
-% from errata 
-l = 134.96298139 + ( 1325*rev + 198.8673981 )*jd_TT + 0.0086972 * jd_TT^2 + 1.78e-5 * jd_TT^3; 
-l = l/3600 * pi/180; 
-
-% Nutation in longitude and obliquity [rad]  
-dpsi = 0;
-deps = 0;
-
-for i=1:N_coeff
-  arg  =  ( C(i,1)*l+C(i,2)*lp+C(i,3)*F+C(i,4)*D+C(i,5)*Om )/const.Arcs;
-  dpsi = dpsi + ( C(i,6)+C(i,7)*T ) * sin(arg);
-  deps = deps + ( C(i,8)+C(i,9)*T ) * cos(arg);
-end
-    
-dpsi = 1e-5 * dpsi/const.Arcs;
-deps = 1e-5 * deps/const.Arcs;
-

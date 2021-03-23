@@ -1,6 +1,6 @@
-function P = precession(JD_TT) 
+function P = precession(JD) 
 
-t   = (JD_TT - 2451545.0)./36525;
+t   = (JD - 2451545.0)./36525;
 
 % precession angles ... in arcseconds 
 zeta  = 2306.2181 * t + 0.30188 * t^2 + 0.017998 * t^3; 
@@ -23,7 +23,7 @@ p22 = -sin(zeta)*cos(theta)*sin(z) + cos(zeta)*cos(z);
 p23 = -sin(theta)*sin(z); 
 
 % P row 3 coeffs 
-p31 = cos(zeta)*cos(theta); 
+p31 = cos(zeta)*sin(theta); 
 p32 = -sin(zeta)*sin(theta); 
 p33 = cos(theta); 
 
