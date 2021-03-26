@@ -23,8 +23,9 @@ wE  = 7.292115146706979e-5; % Earth’s rotational velocity (rad/s)
 
 % Atmospheric drag 
 r       = norm(rv(1:3)); 
-rho0    = 3.614e-13;        % kg/m3
+H       = 88667.0;      % m
+rho0    = 3.614e-13;    % kg/m3
+r0      = (700 + RE);   % m --> km 
 rho     = rho0*exp( -(r-r0)/H ); 
-r0      = (700000.0 + RE);  % m
-H       = 88667.0; % m
-% r = magnitude of the satellite radius vector
+
+% 
