@@ -4,9 +4,6 @@
 
 clear; 
 
-% positionA = [100 100 600 600]; 
-% positionB = [100 100 700 900]; 
-
 %% Problem 1a: 
 % Assume an orbit plane coordinate system with a gravitational parameter of 1, i.e., µ = 1. The
 % equations of motion are:
@@ -132,30 +129,33 @@ N       = N + H' * W * y;
 % normal equation 
 xhat = inv(Lambda) * N; 
 
-% xhat = inv(H'*inv(R)*H + inv(P)) * H'*inv(R)*y + inv(P)*x0; 
-% xhat = inv(H' * W * H + W0) * H' * W + W0*x0; 
+e = y - H*xhat; 
 
-%%
-
-x0 = 2;
-W0 = 2; % Pinv
-W = [2 0 0;0 1 0;0 0 1]; % Rinv
-H = [1 1 1]';
-
-lambda = W0;
-N = W0*x0;
-y = [1 2 1]';
-lambda = lambda + H'*W*H;
-N = N + H'*W*y;
-xhat = N/lambda;
-eps = y - H*xhat;
+% Don't need to iterate for this HW 
+% i = 0; 
+% 
+% while xhat > 1e-16 
+%     
+%     i = i + 1; 
+%     
+%     x = xhat; 
+%     N = W0 * x; 
+%     Lambda  = W0; 
+% 
+%     % accumulate 
+%     Lambda  = Lambda + H' * W * H; 
+%     N       = N + H' * W * y; 
+% 
+%     % normal equation 
+%     xhat = inv(Lambda) * N; 
+% 
+%     e = y - H*xhat; 
+%     
+% end 
 
 %% Problem 2b: What is the best estimate of the observation error, eps? 
 
 e = y - H*xhat; 
 
-
-%%     
-%% subfunctions 
 
 
