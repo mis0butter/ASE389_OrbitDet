@@ -28,4 +28,6 @@ rho0    = 3.614e-13;    % kg/m3
 r0      = (700 + RE);   % m --> km 
 rho     = rho0*exp( -(r-r0)/H ); 
 
-% 
+% Homework 2: Orbit Propagation with Perturbations, J2, and atmospheric drag 
+% Homework 3: STM and The Batch and Sequential Processor
+% Homework 4: Reference Frame Transformations ECEF --> ECI 
