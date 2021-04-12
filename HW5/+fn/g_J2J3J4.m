@@ -1,13 +1,15 @@
 function a = g_J2J3J4(X)
 
+% geopotential due to J2 J3 J4 
+
     global muE J2 J3 J4 RE 
     
     r = sqrt( X(1)^2 + X(2)^2 + X(3)^2 ); 
 
     a0 = -muE;
-    a2 = -3*J2*RE^2/2; 
-    a3 = -J3*RE^3/2; 
-    a4 = -5*J4*RE^4/8; 
+    a2 = -3*J2*RE^2 / 2; 
+    a3 = -J3*RE^3 / 2; 
+    a4 = -5*J4*RE^4 / 8; 
 
     x1 = X(1); 
     x2 = X(2); 

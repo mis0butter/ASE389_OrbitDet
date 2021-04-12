@@ -1,7 +1,7 @@
 function dX = EOM(et, X)
 % ------------------------------------------------------------------------
-% Purpose: Generate EOM for satellite orbiting earth due to gravity (EGM 96),
-% lunisolar perturbations, SRP, and drag 
+% Purpose: Generate EOM for satellite orbiting earth due to geopotential,
+% lunisolar, SRP, and drag perturbations 
 % 
 % Inputs 
 %   t   = [1x1] time (ET epoch) vector 
@@ -11,58 +11,45 @@ function dX = EOM(et, X)
 %   dX  = [7x1] derivative of state vector 
 % ------------------------------------------------------------------------
 
-global muE wE 
+global wE muE 
 global A m p0 r0_drag H  
 
-% force column vector 
-dX = zeros(7, 1);   
-dX(1:3) = X(4:6); 
+% force column vector. Check if X is numeric or symbolic 
+if isnumeric(X)
+    dX = zeros(7, 1);   
+else 
+    dX = sym(zeros(7,1)); 
+end
+
+% Set velocity and CD 
+dX(1:3) = X(4:6);
 CD = X(7); 
 
-% accel due to point mass 
+% accel due to point mass (not needed when geopotential gravity is present)
 r       = norm(X(1:3)); 
-dX(4:6) = ( - muE / r^3 ) * X(1:3); 
+% dX(4:6) = ( - muE / r^3 ) * X(1:3); 
 
-% accel due to gravity - DONE 
-g_J2J3J4 = fn.g_J2J3J4(X); 
-g_ECI    = fn.a_spherical(et, X); 
-dX(4:6)  = dX(4:6) + g_ECI; 
+% accel due to gravity
+if isnumeric(X); g = fn.a_spherical(et, X); else g = fn.g_J2J3J4(X); end
+% g = fn.a_spherical(et, X); 
+% g = fn.g_J2J3J4(X); 
+dX(4:6) = dX(4:6) + g; 
 
-% accel due to lunisolar perturbation - DONE 
-[a_sun, a_moon, X_ESun, ~] = fn.lunisolar(et, X); 
+% accel due to lunisolar perturbation 
+[a_sun, a_moon] = fn.lunisolar(et, X); 
 dX(4:6) = dX(4:6) + a_sun + a_moon; 
 
 % accel due to SRP 
-a_srp = fn.a_SRP(X, X_ESun); 
+a_srp   = fn.a_SRP(et, X); 
 dX(4:6) = dX(4:6) + a_srp; 
 
+% CHECK UNITS. USE KM !!!
 % accel due to drag 
 pA      = p0 * exp( -(r - r0_drag)/H ); 
-VA      = [X(4) + wE * X(2); ... 
-           X(5) - wE * X(1); ... 
-           X(6)]; 
+VA      = X(4:6) - cross( [0; 0; wE], X(1:3) ); 
 VAnorm  = norm(VA); 
-a_drag  = - 1/2 * CD * A/m * pA * VAnorm * VA;  
+a_drag  = - 1/2 * CD * A/m * pA * VAnorm * VA;
+% a_drag  = a_drag / 26.5;  % Correct to match Jah's Amat??? 
 dX(4:6) = dX(4:6) + a_drag; 
 
 end 
-
-
-
-%% functions 
-
-function rv = spice_state(epoch, target, frame, abcorr, observer) 
-
-    rv = zeros(length(epoch), 6); 
-    
-    for i = 1:length(epoch) 
-
-        %  Look-up the state for the defined parameters.
-        starg   = mice_spkezr( target, epoch(i), frame, abcorr, observer);
-        rv(i,:) = starg.state(1:6); 
-        
-    end 
-
-end 
-
-

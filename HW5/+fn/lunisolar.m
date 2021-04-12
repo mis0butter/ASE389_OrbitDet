@@ -1,6 +1,6 @@
-function [a_sun, a_moon, X_Esun, X_Emoon] = lunisolar(et, X)
+function [a_sun, a_moon] = lunisolar(et, X)
 % From Born 
-% BPerturbed Motion Equation 2.3.39 
+% Perturbed Motion Equation 2.3.39 
 
 global muS muM 
 
@@ -11,14 +11,14 @@ observer    = 'Earth';
 abcorr      = 'NONE';
 
 % get states --> Earth to Moon 
-X_Emoon = spice_state(et, target, frame, abcorr, observer); 
+X_Emoon = fn.spice_state(et, target, frame, abcorr, observer); 
 X_Emoon = X_Emoon'; 
 
 % Sun wrt Earth 
 target  = 'Sun'; 
 
 % get states --> Earth to Sun 
-X_Esun = spice_state(et, target, frame, abcorr, observer); 
+X_Esun = fn.spice_state(et, target, frame, abcorr, observer); 
 X_Esun = X_Esun'; 
 
 % pos vector --> sat to sun 
@@ -35,19 +35,5 @@ a_moon = muM * ( X_satmoon(1:3)/norm(X_satmoon(1:3))^3 - X_Emoon(1:3)/norm(X_Emo
 
 end
 
-%% functions 
 
-function rv = spice_state(epoch, target, frame, abcorr, observer) 
-
-    rv = zeros(length(epoch), 6); 
-    
-    for i = 1:length(epoch) 
-
-        %  Look-up the state for the defined parameters.
-        starg   = mice_spkezr( target, epoch(i), frame, abcorr, observer);
-        rv(i,:) = starg.state(1:6); 
-        
-    end 
-
-end 
 

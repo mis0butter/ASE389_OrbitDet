@@ -1,4 +1,4 @@
-function [r_ECEF] = ECItoECEF(eop_data, JD, r_ECI)
+function [r_ECEF] = ECItoECEF(JD, r_ECI)
 % ------------------------------------------------------------------------ 
 % Purpose: Convert ECI (ICRF) position to ECF (ECEF/ITRF) position 
 % 
@@ -21,6 +21,8 @@ function [r_ECEF] = ECItoECEF(eop_data, JD, r_ECI)
 %   N  = nutation of ECF wrt ECI 
 %   P  = precession of ECF wrt ECI 
 % ------------------------------------------------------------------------ 
+
+global eop_data 
 
 % P  = precession of ECF wrt ECI 
 P = fn.precession(JD); 
