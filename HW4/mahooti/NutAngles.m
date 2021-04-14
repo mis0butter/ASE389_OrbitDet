@@ -132,9 +132,6 @@ C = [
     0, 1, 0, 1, 0,      10,    0,       0,    0     % 106
  ];
 
-nut80 = load('nut80.dat'); 
-C = nut80; 
-
 % Mean arguments of luni-solar motion
 
 %   l   mean anomaly of the Moon

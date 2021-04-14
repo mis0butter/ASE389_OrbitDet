@@ -33,12 +33,6 @@ r_ECEF = [ -28738.3218400000; -30844.0723200000; -6.71800000000000 ];
 JD = 2458088.50055556; 
 MJD = JD - 2400000.5; 
 
-%%
-
-eop_data = load('finals_iau1980.txt'); 
-
-[r_ECI] = fn.ECEFtoECI(eop_data, JD, r_ECEF); 
-%%
 rv_ECI = ECEF2ECI(MJD, rv_ECEF'); 
 
 
