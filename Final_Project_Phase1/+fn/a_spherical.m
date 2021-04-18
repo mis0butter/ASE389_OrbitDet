@@ -1,21 +1,22 @@
-function g_ECI = a_spherical(et, X) 
+function g_ECI = a_spherical(et, X_ECI) 
 
 global wE 
+global Cnm Snm 
 
 % accel due to 20x20 spherical harmonics gravity 
 JD_UTC   = cspice_et2utc(et, 'J', 10); 
 JD_UTC   = str2num(extractAfter(JD_UTC, 'JD ')); 
 
 % Convert r in ECI frame to ECEF frame. KM --> M
-[r_ECEF] = fn.ECItoECEF(JD_UTC, X(1:3));
+[r_ECEF] = fn.ECItoECEF(JD_UTC, X_ECI(1:3));
 r_ECEF   = r_ECEF*1000; 
 
-% [g_ECEF] = fn.AccelHarmonic_ECEF(r_ECEF, 20, 20); 
-[gx_ECEF, gy_ECEF, gz_ECEF] = gravitysphericalharmonic( [r_ECEF(1) r_ECEF(2) r_ECEF(3)], 'EGM96'); 
-g_ECEF = [gx_ECEF, gy_ECEF, gz_ECEF]'; 
+[g_ECEF] = fn.AccelHarmonic_ECEF(r_ECEF, 20, 20); 
+% [gx_ECEF, gy_ECEF, gz_ECEF] = gravitysphericalharmonic( [r_ECEF(1) r_ECEF(2) r_ECEF(3)], 'EGM96'); 
+% g_ECEF = [gx_ECEF, gy_ECEF, gz_ECEF]'; 
 
-r_ECI  = X(1:3); 
-v_ECI  = X(4:6); 
+r_ECI  = X_ECI(1:3); 
+v_ECI  = X_ECI(4:6); 
 v_ECEF = v_ECI + cross([0, 0, wE], r_ECI)'; 
 
 % Convert g accel in ECEF to ECI frame, accounting for rotating frames. M --> KM 

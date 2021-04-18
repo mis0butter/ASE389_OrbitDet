@@ -15,16 +15,16 @@ fid = fopen('eop19620101.txt','r');
 eopdata = fscanf(fid,'%i %d %d %i %f %f %f %f %f %f %f %f %i',[13 inf]);
 fclose(fid);
 
-% year = 1980;
-% month = 10;
-% day = 2;
-% hour = 23;
-% minute = 41;
-% second = 24.1137599987633;
-% MJD_UTC = Mjday(year, month, day, hour, minute, second);
-% rv_eci = 1e3*[2769.30588515169, -6067.79991631, -321.35732976219, 1.95719428899467, 1.21970228570168, -7.35245769612438]; % [m]
-% rv_ecef = ECI2ECEF(MJD_UTC, rv_eci)
-% rv_eci = ECEF2ECI(MJD_UTC, rv_ecef')
+year = 1980;
+month = 10;
+day = 2;
+hour = 23;
+minute = 41;
+second = 24.1137599987633;
+MJD_UTC = Mjday(year, month, day, hour, minute, second);
+rv_eci = 1e3*[2769.30588515169, -6067.79991631, -321.35732976219, 1.95719428899467, 1.21970228570168, -7.35245769612438]; % [m]
+rv_ecef = ECI2ECEF(MJD_UTC, rv_eci)
+rv_eci = ECEF2ECI(MJD_UTC, rv_ecef')
 
 %% HW 4
 
@@ -39,7 +39,16 @@ eop_data = load('finals_iau1980.txt');
 
 [r_ECI] = fn.ECEFtoECI(eop_data, JD, r_ECEF); 
 %%
-rv_ECI = ECEF2ECI(MJD, rv_ECEF'); 
+
+X_KJL_ECI  = []; 
+X_KJL_ECEF = [-6143584  1364250  1033743 0 0 0] / 1000;  % Kwajalein 
+
+i = 0; 
+for t = MJD : 60 : MJD + 3600 
+    i = i + 1; 
+    X_KJL_ECI(:,i) = ECEF2ECI(t, X_KJL_ECEF); 
+end
+
 
 
 
