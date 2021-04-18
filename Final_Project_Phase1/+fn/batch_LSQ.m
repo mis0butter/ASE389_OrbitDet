@@ -1,33 +1,28 @@
 function [Ycalc_STA, xhat, Lambda, N] = ... 
     batch_LSQ(Yobs_STA, t_XSTM, XSTM, Ht_fn, X_STA_ECI, W_STA, Lambda0, N0)
 
-% Station data 
-t_STA     = Yobs_STA(:, 2); 
+global wE LEO_DATA_Apparent W_KJL W_DGO W_ACB r_KJL_ECEF r_DGO_ECEF r_ACB_ECEF 
 
-% Calculate Y = H * x 
+% Initialize calculated Y 
 Ycalc_STA = zeros(size(Yobs_STA)); 
 Ycalc_STA(:, 1:2) = Yobs_STA(:, 1:2); 
 
-% Set up lambda 
+% Set up covariance 
+nX     = length(N0); 
 Lambda = Lambda0; 
 N      = N0; 
-N      = zeros(7,1); 
-    
-% find t index 
-ti  = Yobs_STA(1,2); 
-i_X = find(t_XSTM == ti); 
 
 for i = 1:length(Yobs_STA)
-% for i = 1:length(80)
+% for i = 1:length(10)
     
-    % find t index 
+    % find index for same time state and observation 
     ti  = Yobs_STA(i,2); 
     i_X = find(t_XSTM == ti); 
     
     % Extract states (all in ECI) 
-    Xi   = XSTM( i_X, 1:7)'; 
-    STMi = XSTM( i_X, 8:7+49 ); 
-    STMi = reshape(STMi, [7 7]); 
+    Xi   = XSTM( i_X, 1:nX)'; 
+    STMi = XSTM( i_X, nX+1 : nX+nX^2 ); 
+    STMi = reshape(STMi, [nX nX]); 
     XSi  = X_STA_ECI( i_X, : ); 
     
     % compute H [2x7]
@@ -36,21 +31,13 @@ for i = 1:length(Yobs_STA)
     % Accumulate observation 
     Ycalc_STA(i,3:4) = Hi * Xi; 
     
+    % Obtain y difference 
     yi = Yobs_STA(i,3:4)' - fn.G_fn(Xi, XSi); 
 
+    % Accumulate covariance 
     Lambda = Lambda + Hi' * W_STA * Hi; 
     N      = N + Hi' * W_STA * yi; 
 
 end 
-
-% Solve normal equation 
-xhat = inv(Lambda) * N; 
-% xhat = inv(H_mat'*W_mat*H_mat) * H_mat'*W_mat*y_mat; 
-
-% Calculate residuals 
-d_err_STA = Yobs_STA(:,3) - Ycalc_STA(:,3); 
-d_rms_STA = rms(d_err_STA); 
-v_err_STA = Yobs_STA(:,4) - Ycalc_STA(:,4); 
-v_rms_STA = rms(v_err_STA); 
 
 end 

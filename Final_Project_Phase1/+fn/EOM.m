@@ -19,7 +19,7 @@ n = length(X);
 if isnumeric(X)
     dX = zeros(n, 1);   
 else 
-    dX = sym(zeros(n,1)); 
+    dX = sym(zeros(n, 1)); 
 end
 
 % Set velocity and CD 
@@ -28,7 +28,6 @@ dX(1:3) = X(4:6);
 
 % accel due to point mass (not needed when geopotential gravity is present)
 r       = norm(X(1:3)); 
-% dX(4:6) = ( - muE / r^3 ) * X(1:3); 
 
 % accel due to gravity
 if isnumeric(X) 

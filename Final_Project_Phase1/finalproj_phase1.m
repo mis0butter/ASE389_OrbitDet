@@ -25,6 +25,7 @@ X0 = [ 6984.45711518852
       -1.67667852227336
        7.26143715396544
        0.259889857225218 ]; 
+nX  = length(X0); 
 
 % initialize STM 
 STM0 = eye(length(X0)); 
@@ -106,7 +107,7 @@ epochs = LEO_DATA_Apparent(:,2);
 epochs = et_t0 + epochs; 
 
 
-%% Derive A matrix 
+%% Derive A and H matrices 
 
 X  = sym('X', [length(X0) 1]); 
 dX = fn.EOM(et_t0, X); 
@@ -115,6 +116,20 @@ dX = fn.EOM(et_t0, X);
 Amat    = jacobian( dX, X );       
 Amat_fn = matlabFunction(Amat); 
 
+% DO EVERYTHING IN ECI FRAME 
+
+X  = sym('X', [nX; 1]); 
+XS = sym('XS', [nX; 1]); 
+ 
+r_site = [X(1)-XS(1); X(2)-XS(2); X(3)-XS(3)]; 
+v_site = [X(4)-XS(4); X(5)-XS(5); X(6)-XS(6)]; 
+d      = norm(r_site); 
+v      = dot(v_site, r_site/norm(r_site)); 
+
+Htmat      = sym(zeros(2,nX)); 
+Htmat(1,:) = simplify(gradient(d, X)); 
+Htmat(2,:) = simplify(gradient(v, X)); 
+Ht_fn      = matlabFunction(Htmat); 
 
 %% integrate EOM 
 
@@ -130,7 +145,7 @@ disp('Running sim ...')
 if run_state == 1
     [t, X] = ode45(@fn.EOM, [epochs(1) : 60 : epochs(end)], X0, options); 
 elseif run_state == 2
-    [t, XSTM] = ode45(@(t, XSTM) fn.EOM_STM(t, XSTM, Amat_fn, length(X0)), [epochs(1) : 60 : epochs(end)], XSTM0, options); 
+    [t, XSTM] = ode45(@(t, XSTM) fn.EOM_STM(t, XSTM, Amat_fn, nX), [epochs(1) : 60 : epochs(end)], XSTM0, options); 
     X = XSTM(:, 1:6); 
 end 
 disp('Pos and Vel end: ')
@@ -140,6 +155,8 @@ XSTM_ref0 = XSTM;
 
 
 %% convert station coords ECEF --> ECI frame for all t 
+
+global r_KJL_ECEF r_DGO_ECEF r_ACB_ECEF 
 
 % Station coords. Convert M --> KM 
 r_KJL_ECEF = [-6143584  1364250  1033743]' / 1000;  % Kwajalein 
@@ -184,90 +201,103 @@ X_DGO_ECI = [r_DGO_ECI, v_DGO_ECI];
 X_ACB_ECI = [r_ACB_ECI, v_ACB_ECI]; 
 
 
-%% DO EVERYTHING IN ECI FRAME 
-
-X  = sym('X', [7; 1]); 
-XS = sym('XS', [7; 1]); 
- 
-r_site = [X(1)-XS(1); X(2)-XS(2); X(3)-XS(3)]; 
-v_site = [X(4)-XS(4); X(5)-XS(5); X(6)-XS(6)]; 
-d      = norm(r_site); 
-v      = dot(v_site, r_site/norm(r_site)); 
-
-Htmat      = sym(zeros(2,7)); 
-Htmat(1,:) = simplify(gradient(d, X)); 
-Htmat(2,:) = simplify(gradient(v, X)); 
-Ht_fn      = matlabFunction(Htmat); 
-
-
-%% Batch Least Squares a priori 
-
-% initial covariance 
-% 10 km std - position 
-% 10 m/s    - velocity 
-
+%% Setting up filters 
 XSTM = XSTM_ref0; 
 
 % Reset t to start incrementing at 0 
 t_XSTM = t - t(1); 
 
 % weighting matrices m --> km, mm --> km 
+global W_KJL W_DGO W_ACB 
 W_KJL = [(10e-3)^2 0; 0 (0.5e-6)^2]; 
 W_DGO = [(5e-3)^2  0; 0 (1e-6)^2]; 
 W_ACB = [(10e-3)^2 0; 0 (0.5e-6)^2]; 
 
-disp('Find a priori Lambda0 and N0') 
-Lambda0 = zeros(7,7); 
-N0      = zeros(7,1); 
+% initial covariance error 
+% 10 km std - position 
+% 10 m/s    - velocity 
+P0 = [ 10^2*eye(3), zeros(3); 
+       zeros(3),  (10e-3)^2*eye(3) ]; 
+% P0 = eye(6); 
+Lambda0 = inv(P0); 
+Lambda_KJL = Lambda0; 
+Lambda_DGO = Lambda0; 
+Lambda_ACB = Lambda0; 
 
-% Test - Kwajalein 
-[Ycalc_KJL, xhat, Lambda0_KJL, N0] = ... 
-    fn.batch_LSQ(Yobs_KJL, t_XSTM, XSTM, Ht_fn, X_KJL_ECI, W_KJL, Lambda0, N0); 
-norm(xhat(1:3))
-
-% Test - Diego  
-[Ycalc_DGO, xhat, Lambda0_DGO, N0] = ... 
-    fn.batch_LSQ(Yobs_DGO, t_XSTM, XSTM, Ht_fn, X_DGO_ECI, W_DGO, Lambda0, N0); 
-norm(xhat(1:3))
-
-% Test - Arecibo 
-[Ycalc_ACB, xhat, Lambda0_ACB, N0] = ... 
-    fn.batch_LSQ(Yobs_ACB, t_XSTM, XSTM, Ht_fn, X_ACB_ECI, W_ACB, Lambda0, N0); 
-norm(xhat(1:3))
+N0    = Lambda0*X0; 
+N_KJL = N0; 
+N_DGO = N0; 
+N_ACB = N0; 
 
 
-%% Batch all stations 
+%% Batch all stations to refine IC 
 
-% xhat = 100; 
-XSTM0(1:7) = X0; 
-iter = 0; 
+xhat  = 100; 
+XSTM0 = XSTM_ref0(1,:)'; 
+iter  = 0; 
 while norm(xhat) > 1
     
     % keep track of iterations 
     iter = iter + 1; 
     sprintf('iter = %d', iter)
+
+    % Test - Kwajalein 
+    [Ycalc_KJL, xhat_KJL, Lambda_KJL, N_KJL] = ... 
+        fn.batch_LSQ(Yobs_KJL, t_XSTM, XSTM, Ht_fn, X_KJL_ECI, W_KJL, Lambda_KJL, N_KJL); 
+
+    % Test - Diego 
+    [Ycalc_DGO, xhat_DGO, Lambda_DGO, N_DGO] = ... 
+        fn.batch_LSQ(Yobs_DGO, t_XSTM, XSTM, Ht_fn, X_DGO_ECI, W_DGO, Lambda_DGO, N_DGO); 
+    
+    % Test - Arecibo 
+    [Ycalc_ACB, xhat_ACB, Lambda_ACB, N_ACB] = ... 
+        fn.batch_LSQ(Yobs_ACB, t_XSTM, XSTM, Ht_fn, X_ACB_ECI, W_ACB, Lambda_ACB, N_ACB); 
     
     % update initial conditions 
-    XSTM0(1:7) = XSTM0(1:7) + xhat; 
-    [t, XSTM] = ode45(@(t, XSTM) fn.EOM_STM(t, XSTM, Amat_fn), [epochs(1) : 60 : epochs(end)], XSTM0, options); 
+    XSTM0(1:nX) = XSTM0(1:nX) + xhat; 
+    [t, XSTM] = ode45(@(t, XSTM) fn.EOM_STM(t, XSTM, Amat_fn, nX), [epochs(1) : 60 : epochs(end)], XSTM0, options); 
     
-%     % Test - Kwajalein 
-%     [Ycalc_KJL, xhat, Lambda0_KJL, N0] = ... 
-%         fn.batch_LSQ(Yobs_KJL, t_XSTM, XSTM, Ht_fn, X_KJL_ECI, W_KJL, Lambda0_KJL, N0); 
+    
+
+% Solve normal equation 
+xhat = inv(Lambda) * N; 
+    
 % 
 %     % Test - Diego  
 %     [Ycalc_DGO, xhat, Lambda0_DGO, N0] = ... 
 %         fn.batch_LSQ(Yobs_DGO, t_XSTM, XSTM, Ht_fn, X_DGO_ECI, W_DGO, Lambda0_DGO, N0); 
-
-    % Test - Arecibo 
-    [Ycalc_ACB, xhat, Lambda0_ACB, N0] = ... 
-        fn.batch_LSQ(Yobs_ACB, t_XSTM, XSTM, Ht_fn, X_ACB_ECI, W_ACB, Lambda0_ACB, N0); 
     
-    disp('xhat pos') 
+    disp('ACB xhat pos') 
     xhat(1:3)
+    
+    disp('ACB xhat pos norm')
+    norm(xhat(1:3))
     
     disp('x IC pos') 
     XSTM0(1:3)
+    
+end 
+
+%% EKF - all observations 
+
+et_obs    = LEO_DATA_Apparent(:,2) + et_t0; 
+XSTM_prev = XSTM0; 
+iter      = 0; 
+P_prev    = P0; 
+
+for i = 2:length(et_obs)
+    
+    % keep track of iterations 
+    iter = iter + 1; 
+    sprintf('iter = %d', iter)
+    
+    t_prop = [et_obs(i) et_obs(i-1)]; 
+    [XSTM, xhat, P] = fn.EKF(XSTM_prev, nX, epochs(1), t_prop, options, ... 
+        Amat_fn, Ht_fn, P_prev); 
+    
+    % update measurement 
+    XSTM_prev = [XSTM_prev(1:nX) + xhat; STM0]; 
+    P_prev = P; 
     
 end 
 
@@ -275,7 +305,7 @@ end
 
 % Diego Garcia 
 xhat = 1; 
-XSTM0(1:7) = X0; 
+XSTM0(1:nX) = X0; 
 iter = 0; 
 while norm(xhat) > 1e-1
     

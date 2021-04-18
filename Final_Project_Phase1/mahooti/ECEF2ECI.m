@@ -32,7 +32,7 @@ U      = Pi*Theta*N*P;                           % ICRS to ITRS transformation
 dU     = Pi*dTheta*N*P;                          % Derivative [1/s]
 
 % Transformation from WGS to ICRS
-r = U'*Y0(1:3)';
-v = U'*Y0(4:6)' + dU'*Y0(1:3)';
+r = U'*Y0(1:3);
+v = U'*Y0(4:6) + dU'*Y0(1:3);
 Y = [r;v];
 
