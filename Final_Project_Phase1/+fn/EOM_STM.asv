@@ -15,21 +15,18 @@ function dXSTM = EOM_STM(et, XSTM, Amat_fn, n)
 dXSTM = zeros(length(XSTM), 1);   
 
 % EOM 
-dX         = fn.EOM(et, XSTM); 
-dXSTM(1:n) = dX(1:n); 
+dXSTM(1:n) = fn.EOM(et, XSTM); 
 
 % STM stuff 
 if n == 6
-    Amat = Amat_fn(XSTM(1), XSTM(2), XSTM(3), XSTM(4), XSTM(5), XSTM(6)); 
 else
     Amat = Amat_fn(XSTM(1), XSTM(2), XSTM(3), XSTM(4), XSTM(5), XSTM(6), XSTM(7)); 
-end
 STM  = XSTM(n+1:end); 
 STM  = reshape(STM, [n n]); 
 dSTM = Amat*STM; 
 dSTM = reshape(dSTM, [n^2, 1]); 
 
-dXSTM(n+1:end) = dSTM; 
+dXSTM(8:7+49) = dSTM; 
 
 end 
 

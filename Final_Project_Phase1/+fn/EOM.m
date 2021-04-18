@@ -5,34 +5,37 @@ function dX = EOM(et, X)
 % 
 % Inputs 
 %   t   = [1x1] time (ET epoch) vector 
-%   X   = [7x1] state vector in ECI frame (inertial) 
+%   X   = [6x1] state vector in ECI frame (inertial) 
 % 
 % Outputs 
-%   dX  = [7x1] derivative of state vector 
+%   dX  = [6x1] derivative of state vector 
 % ------------------------------------------------------------------------
 
 global wE muE 
-global A m p0 r0_drag H  
+global A m p0 r0_drag H CD 
 
 % force column vector. Check if X is numeric or symbolic 
+n = length(X); 
 if isnumeric(X)
-    dX = zeros(7, 1);   
+    dX = zeros(n, 1);   
 else 
-    dX = sym(zeros(7,1)); 
+    dX = sym(zeros(n,1)); 
 end
 
 % Set velocity and CD 
 dX(1:3) = X(4:6);
-CD = X(7); 
+% CD = X(7); 
 
 % accel due to point mass (not needed when geopotential gravity is present)
 r       = norm(X(1:3)); 
 % dX(4:6) = ( - muE / r^3 ) * X(1:3); 
 
 % accel due to gravity
-if isnumeric(X); g = fn.a_spherical(et, X); else g = fn.g_J2J3J4(X); end
-% g = fn.a_spherical(et, X); 
-% g = fn.g_J2J3J4(X); 
+if isnumeric(X) 
+    g = fn.a_spherical(et, X); 
+else
+    g = fn.g_J2J3J4(X); 
+end
 dX(4:6) = dX(4:6) + g; 
 
 % accel due to lunisolar perturbation 

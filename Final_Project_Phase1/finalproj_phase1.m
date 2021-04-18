@@ -13,6 +13,9 @@ cspice_furnsh( 'spice_data/pck00010.tpc ')
 
 %% Parameters 
 
+global muE RE muS AU muM eE wE J2 J3 J4 Cd Cs eop_data 
+global A m p p0 r0_drag H CD
+
 % initial state initial guess (M --> KM)
 CD  = 1.88; 
    
@@ -21,24 +24,12 @@ X0 = [ 6984.45711518852
        13.0925904314402 
       -1.67667852227336
        7.26143715396544
-       0.259889857225218 
-       CD ]; 
-   
-% X0 = [ 85917.5037930985
-%           18943.2889929331
-%          -3776.58224351347
-%         -0.461676934792153
-%         -0.937684484459721
-%          -1.13962098759127
-%          CD ]; 
+       0.259889857225218 ]; 
 
 % initialize STM 
-STM0 = eye(7); 
-STM0 = reshape(STM0, [49 1]); 
+STM0 = eye(length(X0)); 
+STM0 = reshape(STM0, [length(X0)^2 1]); 
 XSTM0 = [X0; STM0];  
-
-global muE RE muS AU muM eE wE J2 J3 J4 Cd Cs eop_data 
-global A m p p0 r0_drag H 
 
 % Constants 
 muE = 398600.4415;          % Earth Gravitational Parameter (km^3/s^2) 
@@ -117,7 +108,7 @@ epochs = et_t0 + epochs;
 
 %% Derive A matrix 
 
-X  = sym('X', [7 1]); 
+X  = sym('X', [length(X0) 1]); 
 dX = fn.EOM(et_t0, X); 
 
 % compute partials 
@@ -139,7 +130,7 @@ disp('Running sim ...')
 if run_state == 1
     [t, X] = ode45(@fn.EOM, [epochs(1) : 60 : epochs(end)], X0, options); 
 elseif run_state == 2
-    [t, XSTM] = ode45(@(t, XSTM) fn.EOM_STM(t, XSTM, Amat_fn), [epochs(1) : 60 : epochs(end)], XSTM0, options); 
+    [t, XSTM] = ode45(@(t, XSTM) fn.EOM_STM(t, XSTM, Amat_fn, length(X0)), [epochs(1) : 60 : epochs(end)], XSTM0, options); 
     X = XSTM(:, 1:6); 
 end 
 disp('Pos and Vel end: ')
