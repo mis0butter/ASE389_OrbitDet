@@ -26,7 +26,6 @@ X0 = [ 6984.45711518852
        7.26143715396544
        0.259889857225218 ]; 
    
-% ballpark right answer 
 % X0 = [6978.67143482881; ...
 %       1616.67588830049; ...
 %       19.5526232375234; ...
@@ -56,13 +55,6 @@ Cs  = 0.04;                 % specular reflection
 J2 = 1.08262617385222e-3; 
 J3 = -2.53241051856772e-6;
 J4 = -1.61989759991697e-6; 
-
-global r_KJL_ECEF r_DGO_ECEF r_ACB_ECEF 
-
-% Station coords. Convert M --> KM 
-r_KJL_ECEF = [-6143584  1364250  1033743]' / 1000;  % Kwajalein 
-r_DGO_ECEF = [ 1907295  6030810 -817119 ]' / 1000;  % Diego 
-r_ACB_ECEF = [ 2390310 -5564341  1994578]' / 1000;  % Arecibo 
 
 global LEO_DATA_Apparent 
 % Load observation data 
@@ -172,43 +164,50 @@ t_XSTM_ref0 = t;
 
 
 %% convert station coords ECEF --> ECI frame for all t 
-% v_KJL_ECEF = [0; 0; 0]; 
-% v_DGO_ECEF = [0; 0; 0]; 
-% v_ACB_ECEF = [0; 0; 0]; 
-% 
-% r_KJL_ECI = []; 
-% v_KJL_ECI = []; 
-% r_DGO_ECI = []; 
-% v_DGO_ECI = []; 
-% r_ACB_ECI = []; 
-% v_ACB_ECI = []; 
-% % t is really et (ephemeris time) 
-% for i = 1:length(t)
-%     
-%     % get current JD time 
-%     JD_UTC = cspice_et2utc(t(i), 'J', 10); 
-%     JD_UTC = str2num(extractAfter(JD_UTC, 'JD ')); 
-%     
-%     % Convert to ECI frame, save in array 
-%     r_KJL_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, r_KJL_ECEF); 
-%     a_ECEF          = v_KJL_ECEF + cross([ 0 0 wE ]', r_KJL_ECEF); 
-%     v_KJL_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, a_ECEF); % Technically wrong. Look in Vallado 
-% 
-%     % v_KJL_ECI  = fn.ECEFtoECI(JD, v_KJL_ECEF) + cross([ 0 0 wE]', r_KJL_ECEF); 
-% 
-%     r_DGO_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, r_DGO_ECEF); 
-%     a_ECEF          = v_KJL_ECEF + cross([ 0 0 wE ]', r_DGO_ECEF); 
-%     v_DGO_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, a_ECEF); % Technically wrong. Look in Vallado 
-% 
-%     r_ACB_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, r_ACB_ECEF); 
-%     a_ECEF          = v_KJL_ECEF + cross([ 0 0 wE ]', r_ACB_ECEF); 
-%     v_ACB_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, a_ECEF); % Technically wrong. Look in Vallado 
-%     
-% end 
-% 
-% X_KJL_ECI = [r_KJL_ECI, v_KJL_ECI]; 
-% X_DGO_ECI = [r_DGO_ECI, v_DGO_ECI]; 
-% X_ACB_ECI = [r_ACB_ECI, v_ACB_ECI]; 
+
+global r_KJL_ECEF r_DGO_ECEF r_ACB_ECEF 
+
+% Station coords. Convert M --> KM 
+r_KJL_ECEF = [-6143584  1364250  1033743]' / 1000;  % Kwajalein 
+r_DGO_ECEF = [ 1907295  6030810 -817119 ]' / 1000;  % Diego 
+r_ACB_ECEF = [ 2390310 -5564341  1994578]' / 1000;  % Arecibo 
+v_KJL_ECEF = [0; 0; 0]; 
+v_DGO_ECEF = [0; 0; 0]; 
+v_ACB_ECEF = [0; 0; 0]; 
+
+r_KJL_ECI = []; 
+v_KJL_ECI = []; 
+r_DGO_ECI = []; 
+v_DGO_ECI = []; 
+r_ACB_ECI = []; 
+v_ACB_ECI = []; 
+% t is really et (ephemeris time) 
+for i = 1:length(t)
+    
+    % get current JD time 
+    JD_UTC = cspice_et2utc(t(i), 'J', 10); 
+    JD_UTC = str2num(extractAfter(JD_UTC, 'JD ')); 
+    
+    % Convert to ECI frame, save in array 
+    r_KJL_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, r_KJL_ECEF); 
+    a_ECEF          = v_KJL_ECEF + cross([ 0 0 wE ]', r_KJL_ECEF); 
+    v_KJL_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, a_ECEF); % Technically wrong. Look in Vallado 
+
+    % v_KJL_ECI  = fn.ECEFtoECI(JD, v_KJL_ECEF) + cross([ 0 0 wE]', r_KJL_ECEF); 
+
+    r_DGO_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, r_DGO_ECEF); 
+    a_ECEF          = v_KJL_ECEF + cross([ 0 0 wE ]', r_DGO_ECEF); 
+    v_DGO_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, a_ECEF); % Technically wrong. Look in Vallado 
+
+    r_ACB_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, r_ACB_ECEF); 
+    a_ECEF          = v_KJL_ECEF + cross([ 0 0 wE ]', r_ACB_ECEF); 
+    v_ACB_ECI(i,:)  = fn.ECEFtoECI(JD_UTC, a_ECEF); % Technically wrong. Look in Vallado 
+    
+end 
+
+X_KJL_ECI = [r_KJL_ECI, v_KJL_ECI]; 
+X_DGO_ECI = [r_DGO_ECI, v_DGO_ECI]; 
+X_ACB_ECI = [r_ACB_ECI, v_ACB_ECI]; 
 
 
 %% Setting up filters 
@@ -250,7 +249,7 @@ Lambda_prev = Lambda0;
 
 % Batch first 28 measurements 
 
-while norm(Xstar(1:3)) > 0.1
+while norm(Xstar(1:3)) > 1
     
     % keep track of iterations 
     iter = iter + 1; 
@@ -283,7 +282,7 @@ end
 
 Lambda_batch = Lambda; 
 XSTM_batch   = XSTM; 
-XSTM0_batch  = XSTM0; 
+XSTM0_batch     = XSTM0; 
 
 %% EKF - all observations 
 
@@ -395,31 +394,61 @@ t_KJL = Yobs_KJL(:,2);
 t_DGO = Yobs_DGO(:,2); 
 t_ACB = Yobs_ACB(:,2); 
 
-% prefits 
+
 [dpre_err_KJL, dpre_rms_KJL, vpre_err_KJL, vpre_rms_KJL] = calc_res(Yobs_KJL, Ypre_KJL); 
+% Calculate residuals 
 [dpre_err_DGO, dpre_rms_DGO, vpre_err_DGO, vpre_rms_DGO] = calc_res(Yobs_DGO, Ypre_DGO); 
+% Calculate residuals 
 [dpre_err_ACB, dpre_rms_ACB, vpre_err_ACB, vpre_rms_ACB] = calc_res(Yobs_ACB, Ypre_ACB); 
 
-% postfits 
 [dpost_err_KJL, dpost_rms_KJL, vpost_err_KJL, vpost_rms_KJL] = calc_res(Yobs_KJL, Ypost_KJL); 
+% Calculate residuals 
 [dpost_err_DGO, dpost_rms_DGO, vpost_err_DGO, vpost_rms_DGO] = calc_res(Yobs_DGO, Ypost_DGO); 
+% Calculate residuals 
 [dpost_err_ACB, dpost_rms_ACB, vpost_err_ACB, vpost_rms_ACB] = calc_res(Yobs_ACB, Ypost_ACB); 
 
-
-%%
-
 ftitle = 'Kwajalein Residuals'; 
-plot_res(ftitle, t_KJL, sigma3_KJL, dpre_err_KJL, dpre_rms_KJL, vpre_err_KJL, vpre_rms_KJL, ... 
-    dpost_err_KJL, dpost_rms_KJL, vpost_err_KJL, vpost_rms_KJL)
-
-ftitle = 'D Residuals'; 
-plot_res(ftitle, t_KJL, sigma3_KJL, dpre_err_KJL, dpre_rms_KJL, vpre_err_KJL, vpre_rms_KJL, ... 
-    dpost_err_KJL, dpost_rms_KJL, vpost_err_KJL, vpost_rms_KJL)
-
-ftitle = 'Kwajalein Residuals'; 
-plot_res(ftitle, t_KJL, sigma3_KJL, dpre_err_KJL, dpre_rms_KJL, vpre_err_KJL, vpre_rms_KJL, ... 
-    dpost_err_KJL, dpost_rms_KJL, vpost_err_KJL, vpost_rms_KJL)
-
+figure('name', ftitle); 
+    subplot(2,2,1) 
+        scatter(t_KJL, dpre_err_KJL); hold on; grid on; 
+%         scatter(t_DGO, dpre_err_DGO); 
+%         scatter(t_ACB, dpre_err_ACB); 
+        plot(t_KJL, sigma3_KJL(:,1), 'r'); 
+        plot(t_KJL, -sigma3_KJL(:,1), 'r'); 
+        title({'Prefit Range Residuals. RMS (km): '; ... 
+            sprintf('ATL = %.3g, DGO = %.3g, ACB = %.3g', dpre_rms_KJL, dpre_rms_DGO, dpre_rms_ACB) }); 
+        ylabel('km')  
+    subplot(2,2,3) 
+        scatter(t_KJL, vpre_err_KJL); hold on; grid on; 
+%         scatter(t_DGO, vpre_err_DGO); 
+%         scatter(t_ACB, vpre_err_ACB); 
+        plot(t_KJL, sigma3_KJL(:,2), 'r'); 
+        plot(t_KJL, -sigma3_KJL(:,2), 'r'); 
+        title({'Prefit Range-Rate Residuals. RMS (km/s): '; ... 
+            sprintf('ATL = %.3g, DGO = %.3g, ACB = %.3g', vpre_rms_KJL, vpre_rms_DGO, vpre_rms_ACB) }); 
+        xlabel('Time (s)') 
+        ylabel('km/s') 
+    subplot(2,2,2) 
+        scatter(t_KJL, dpost_err_KJL); hold on; grid on; 
+%         scatter(t_DGO, dpost_err_DGO); 
+%         scatter(t_ACB, dpost_err_ACB); 
+        plot(t_KJL, sigma3_KJL(:,1), 'r'); 
+        plot(t_KJL, -sigma3_KJL(:,1), 'r'); 
+        title({'Postfit Range Residuals. RMS (km): '; ... 
+            sprintf('ATL = %.3g, DGO = %.3g, ACB = %.3g', dpost_rms_KJL, dpost_rms_DGO, dpost_rms_ACB) }); 
+        ylabel('km')  
+    subplot(2,2,4) 
+        scatter(t_KJL, vpost_err_KJL); hold on; grid on; 
+%         scatter(t_DGO, vpost_err_DGO); 
+%         scatter(t_ACB, vpost_err_ACB); 
+        plot(t_KJL, sigma3_KJL(:,2), 'r'); 
+        plot(t_KJL, -sigma3_KJL(:,2), 'r'); 
+        title({'Postfit Range-Rate Residuals. RMS (km/s): '; ... 
+            sprintf('ATL = %.3g, DGO = %.3g, ACB = %.3g', vpost_rms_KJL, vpost_rms_DGO, vpost_rms_ACB) }); 
+        xlabel('Time (s)') 
+        ylabel('km/s') 
+%         legend('Kwajalein', 'Diego', 'Arecibo', 'color', 'none'); 
+    sgtitle(ftitle); 
 
 %% Subfunctions 
 
@@ -433,39 +462,6 @@ v_rms_STA = rms(v_err_STA);
 
 end 
 
-function plot_res(ftitle, t_STA, sigma3_STA, dpre_err_STA, dpre_rms_STA, vpre_err_STA, vpre_rms_STA, ... 
-    dpost_err_STA, dpost_rms_STA, vpost_err_STA, vpost_rms_STA)
-
-figure('name', ftitle); 
-    subplot(4,1,1) 
-        scatter(t_STA, dpre_err_STA); hold on; grid on; 
-        plot(t_STA, sigma3_STA(:,1), 'r'); 
-        plot(t_STA, -sigma3_STA(:,1), 'r'); 
-        title({sprintf('PREFIT range residuals (km): mean = %.3g, RMS = %.3g', mean(dpre_err_STA), dpre_rms_STA)} ); 
-        ylabel('km')  
-    subplot(4,1,2) 
-        scatter(t_STA, vpre_err_STA); hold on; grid on; 
-        plot(t_STA, sigma3_STA(:,2), 'r'); 
-        plot(t_STA, -sigma3_STA(:,2), 'r'); 
-        title({sprintf('PREFIT range-rate residuals (km/s): mean = %.3g, RMS = %.3g', mean(vpre_err_STA), vpre_rms_STA)} ); 
-        xlabel('Time (s)') 
-        ylabel('km/s') 
-    subplot(4,1,3) 
-        scatter(t_STA, dpost_err_STA); hold on; grid on; 
-        plot(t_STA, sigma3_STA(:,1), 'r'); 
-        plot(t_STA, -sigma3_STA(:,1), 'r'); 
-        title({sprintf('POSTFIT range residuals (km): mean = %.3g, RMS = %.3g', mean(dpost_err_STA), dpost_rms_STA)} ); 
-        ylabel('km')  
-    subplot(4,1,4) 
-        scatter(t_STA, vpost_err_STA); hold on; grid on; 
-        plot(t_STA, sigma3_STA(:,2), 'r'); 
-        plot(t_STA, -sigma3_STA(:,2), 'r'); 
-        title({sprintf('POSTFIT range-rate residuals (km/s): mean = %.3g, RMS = %.3g', mean(vpost_err_STA), vpost_rms_STA)} ); 
-        xlabel('Time (s)') 
-        ylabel('km/s') 
-    sgtitle(ftitle); 
-
-end 
 
 
 

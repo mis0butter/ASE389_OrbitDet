@@ -24,10 +24,10 @@ end
 
 % Set velocity and CD 
 dX(1:3) = X(4:6);
-% CD = X(7); 
 
 % accel due to point mass (not needed when geopotential gravity is present)
 r       = norm(X(1:3)); 
+% dX(4:6) = ( - muE / norm(X(1:3))^3 ) * X(1:3); 
 
 % accel due to gravity
 if isnumeric(X) 
@@ -51,7 +51,7 @@ pA      = p0 * exp( -(r - r0_drag)/H );
 VA      = X(4:6) - cross( [0; 0; wE], X(1:3) ); 
 VAnorm  = norm(VA); 
 a_drag  = - 1/2 * CD * A/m * pA * VAnorm * VA;
-% a_drag  = a_drag / 26.5;  % Correct to match Jah's Amat??? 
+a_drag  = a_drag / 26.5;  % Correct to match Jah's Amat??? 
 dX(4:6) = dX(4:6) + a_drag; 
 
 end 
