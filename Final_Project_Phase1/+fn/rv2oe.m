@@ -14,7 +14,7 @@ function [oe, Tp] = rv2oe(rv)
 %           Tp  = time of perigee passing  (optional output) 
 % ------------------------------------------------------------------------
 
-global mu 
+global muE
 
 r = rv(1:3); 
 v = rv(4:6); 
@@ -26,18 +26,18 @@ h       = cross(r,v);
 nhat    = cross( [0 0 1], h ); 
 
 % eccentricity 
-evec    = ( (norm(v)^2 - mu/norm(r))*r - dot(r,v)*v ) / mu; 
+evec    = ( (norm(v)^2 - muE/norm(r))*r - dot(r,v)*v ) / muE; 
 e       = norm(evec); 
 
 % specific mechanical energy 
-energy  = norm(v)^2/2 - mu/norm(r); 
+energy  = norm(v)^2/2 - muE/norm(r); 
 
 % semi-major axis and p
 if abs(e-1.0)>eps
-   a = -mu/(2*energy); 
+   a = -muE/(2*energy); 
    p = a*(1-e^2); 
 else
-   p = norm(h)^2/mu; 
+   p = norm(h)^2/muE; 
    a = inf; 
 end
 
@@ -86,14 +86,14 @@ idx = dot(r,v) < 0; if any(idx); nu(idx) = 2*pi - nu(idx); end
 % ArgLat --> arg of perigee
 % ArgLat = atan2d(R0(3)/sind(i),R0(1)*cosd(RAAN) + R0(2)*sind(RAAN));
 % 
-% TA = atan2d(sqrt((a*(1-e^2))/(mu))*dot(V0,R0),(a*(1-e^2))-norm(R0));
+% TA = atan2d(sqrt((a*(1-e^2))/(muE))*dot(V0,R0),(a*(1-e^2))-norm(R0));
 
 oe = [a; e; i; w; O; nu]; 
 
 % perigee passing time 
 
 rnorm = norm(r); 
-n = sqrt(mu/a^3); 
+n = sqrt(muE/a^3); 
 E = acos( rnorm/a * cos(nu) + e );
 M = E - e*sin(E); 
 Tp = M/n; 

@@ -1,7 +1,7 @@
 function [Ycalc_STA, Lambda, N] = ... 
     batch_LSQ(Yobs_STA, t_XSTM, XSTM, et_t0, Ht_fn, Lambda0, N0)
 
-global wE W_KJL W_DGO W_ACB 
+global wE R_KJL R_DGO R_ACB 
 global r_KJL_ECEF r_DGO_ECEF r_ACB_ECEF 
 
 % Initialize calculated Y 
@@ -27,13 +27,13 @@ for i = 1:28
 
     % observation covariance 
     if Yi(1) == 1
-        R = W_KJL; 
+        R = R_KJL; 
         r_STA_ECEF = r_KJL_ECEF; 
     elseif Yi(1) == 2
-        R = W_DGO; 
+        R = R_DGO; 
         r_STA_ECEF = r_DGO_ECEF; 
     else 
-        R = W_ACB; 
+        R = R_ACB; 
         r_STA_ECEF = r_ACB_ECEF; 
     end 
 

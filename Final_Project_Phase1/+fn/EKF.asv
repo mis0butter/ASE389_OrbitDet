@@ -1,7 +1,8 @@
-function [t_XSTM, XSTM, Xstar, Y_prefit, Y_postfit, Pi, Lambda] = ... 
-    EKF(XSTM_prev, nX, et_t0, t_prop, options, Amat_fn, Ht_fn, P_prev)
+function [t_XSTM, XSTM, Xstar, Y_prefit, Y_postfit, P_update, L_pre, L_post] = ... 
+    EKF(Yobs_STA, XSTM_prev, nX, et_t0, t_prop, options, Amat_fn, Ht_fn, P_prev, DATA)
 
-global wE LEO_DATA_Apparent W_KJL W_DGO W_ACB r_KJL_ECEF r_DGO_ECEF r_ACB_ECEF 
+global wE R_KJL R_DGO R_ACB 
+global r_KJL_ECEF r_DGO_ECEF r_ACB_ECEF 
 
 % Integrate ref trajectory and STM from t = i-1 (prev) to t = i (curr) 
 if length(t_prop) > 1
@@ -17,10 +18,10 @@ end
 STMi = reshape(STMi, [nX nX]); 
 
 % % find index for same time state and observation 
-t_Y   = LEO_DATA_Apparent(:,2) + et_t0; % time after initial epoch 
+t_Y   = Yobs_STA(:,2) + et_t0; % time after initial epoch 
 ti_X  = t_XSTM(end); 
 i_Y   = find(t_Y == ti_X); 
-Yi    = LEO_DATA_Apparent(i_Y, :); 
+Yi    = Yobs_STA(i_Y, :); 
 
 % get JD time 
 JD_UTC = cspice_et2utc(t_XSTM(end), 'J', 10); 
@@ -28,61 +29,162 @@ JD_UTC = str2num(extractAfter(JD_UTC, 'JD '));
 
 % observation covariance 
 if Yi(1) == 1
-    R = W_KJL; 
+    R = R_KJL; 
     r_STA_ECEF = r_KJL_ECEF; 
 elseif Yi(1) == 2
-    R = W_DGO; 
+    R = R_DGO; 
     r_STA_ECEF = r_DGO_ECEF; 
 else 
-    R = W_ACB; 
+    R = R_ACB; 
     r_STA_ECEF = r_ACB_ECEF; 
 end 
 
 % Convert station to ECI frame 
-r_STA_ECI  = fn.ECEFtoECI(JD_UTC, r_STA_ECEF); 
-v_KJL_ECEF = [0; 0; 0]; 
-a_ECEF     = v_KJL_ECEF + cross([ 0 0 wE ]', r_STA_ECEF); 
-v_STA_ECI  = fn.ECEFtoECI(JD_UTC, a_ECEF); % Technically wrong. Look in Vallado 
-XSi        = [r_STA_ECI; v_STA_ECI]; 
+XSi = rv_ECEFtoECI(JD_UTC, r_STA_ECEF, [0; 0; 0]); 
 
 % Time update + process noise 
 dt    = t_prop(end) - t_prop(1); 
-Q     = diag( (1e-10)^2 * [1 1 1] ); 
+Q     = diag( (10e-10)^2 * [1 1 1] ); 
+% Q     = diag( (10000e-10)^2 * [1 1 1] ); 
 Gamma = [diag( dt^2/2 * [1 1 1] ); diag([dt dt dt])]; 
-proc_noise = Gamma * Q * Gamma'; 
-Pi_bar = STMi * P_prev * STMi' + proc_noise; 
+P_noise = Gamma * Q * Gamma'; 
+Pi_bar = STMi * P_prev * STMi' + P_noise; 
 
-% Y prefit 
-Y_prefit(1:2) = Yi(1:2); 
-Y_prefit(3:4) = fn.G_fn(Xi, XSi)'; 
+% DATA = 0 --> all stations 
+% DATA = 1 --> range only 
+% DATA = 2 --> range-rate only 
+
+if DATA == 1 
+    [Xstar, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_1(Yi, Xi, XSi, Ht_r_fn, Pi_bar, R); 
+elseif DATA == 2
     
-% Observation-state matrix 
-Hti = Ht_fn(Xi(1), Xi(2), Xi(3), Xi(4), Xi(5), Xi(6), XSi(1), XSi(2), XSi(3), XSi(4), XSi(5), XSi(6)); 
-
-% % Accumulate observation 
-% Ycalc_STA(1:2) = LEO_DATA_Apparent(i_Y, 1:2); 
-% Ycalc_STA(3:4) = Hti * STMi * Xi'; 
-
-% Gain matrix 
-Ki = Pi_bar * Hti' * inv( Hti * Pi_bar * Hti' + R ); 
-    
-% Obtain y difference 
-yi = Yi(3:4)' - fn.G_fn(Xi, XSi); 
-
-% Measurement and reference orbit update 
-xhat  = Ki * yi; 
-Xstar = Xi + xhat; 
-Pi    = ( eye(nX) - Ki * Hti ) * Pi_bar;
-% Pi    = ( eye(nX) - Ki * Hti ) * Pi_bar * ( eye(nX) - Ki * Hti )' + Ki * R * Ki'; 
-
-% Innovation (information) covariance 
-Lambda = (Hti * Pi * Hti' + R); 
-
-% Y postfit 
-Y_postfit(1:2) = Yi(1:2); 
-Y_postfit(3:4) = fn.G_fn(Xstar, XSi)'; 
+else % DATA == 0 
+    [Xstar, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_0(Yi, Xi, XSi, Ht_fn, Pi_bar, R); 
+end
 
 end 
+
+%% subfunctions 
+
+function XSi = rv_ECEFtoECI(JD_UTC, r_STA_ECEF, v_STA_ECEF)
+
+    r_STA_ECI  = fn.ECEFtoECI(JD_UTC, r_STA_ECEF); 
+    a_ECEF     = v_STA_ECEF + cross([ 0 0 wE ]', r_STA_ECEF); 
+    v_STA_ECI  = fn.ECEFtoECI(JD_UTC, a_ECEF); % Technically wrong. Look in Vallado 
+    XSi        = [r_STA_ECI; v_STA_ECI]; 
+
+end
+
+function [Xstar, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_0(Yi, Xi, XSi, Ht_fn, Pi_bar, R)
+
+    % Y prefit 
+    Y_prefit(1:2) = Yi(1:2); 
+    Y_prefit(3:4) = fn.G_fn(Xi, XSi)'; 
+
+    % PREFIT Observation-state matrix 
+    Hti_pre = Ht_fn(Xi(1), Xi(2), Xi(3), Xi(4), Xi(5), Xi(6), XSi(1), XSi(2), XSi(3), XSi(4), XSi(5), XSi(6)); 
+
+    % PREFIT Innovation (information) covariance 
+    L_pre = (Hti_pre * Pi_bar * Hti_pre' + R); 
+
+    % Gain matrix 
+    Ki = Pi_bar * Hti_pre' * inv( Hti_pre * Pi_bar * Hti_pre' + R ); 
+
+    % Obtain y difference 
+    yi = Yi(3:4)' - fn.G_fn(Xi, XSi); 
+
+    % Measurement and reference orbit update 
+    xhat     = Ki * yi; 
+    Xstar    = Xi + xhat; 
+    P_update = ( eye(nX) - Ki * Hti_pre ) * Pi_bar;
+    % Pi    = ( eye(nX) - Ki * Hti ) * Pi_bar * ( eye(nX) - Ki * Hti )' + Ki * R * Ki'; 
+
+    % POSTFIT Observation-state matrix 
+    Hti_post = Ht_fn(Xi(1), Xstar(2), Xstar(3), Xstar(4), Xstar(5), Xstar(6), XSi(1), XSi(2), XSi(3), XSi(4), XSi(5), XSi(6)); 
+
+    % POSTFIT Innovation (information) covariance 
+    L_post = (Hti_post * P_update * Hti_post' + R); 
+
+    % Y postfit 
+    Y_postfit(1:2) = Yi(1:2); 
+    Y_postfit(3:4) = fn.G_fn(Xstar, XSi)'; 
+
+end 
+
+function [Xstar, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_1(Yi, Xi, XSi, Ht_r_fn, Pi_bar, R)
+
+    % Y prefit 
+    Y_prefit(1:2) = Yi(1:2); 
+    y             = fn.G_fn(Xi, XSi)'; 
+    Y_prefit(3)   = y(1); 
+
+    % PREFIT Observation-state matrix 
+    Hti_pre = Ht_r_fn(Xi(1), Xi(2), Xi(3), XSi(1), XSi(2), XSi(3)); 
+
+    % PREFIT Innovation (information) covariance 
+    L_pre = (Hti_pre * Pi_bar * Hti_pre' + R); 
+
+    % Gain matrix 
+    Ki = Pi_bar * Hti_pre' * inv( Hti_pre * Pi_bar * Hti_pre' + R ); 
+
+    % Obtain y difference (range only) 
+    yi = Yi(3:4)' - fn.G_fn(Xi, XSi); 
+    yi = yi(1); 
+
+    % Measurement and reference orbit update 
+    xhat     = Ki * yi; 
+    Xstar    = Xi + xhat; 
+    P_update = ( eye(nX) - Ki * Hti_pre ) * Pi_bar;
+
+    % PREFIT Observation-state matrix 
+    Hti_post = Ht_r_fn(Xstar(1), Xstar(2), Xstar(3), XSi(1), XSi(2), XSi(3)); 
+
+    % POSTFIT Innovation (information) covariance 
+    L_post = (Hti_post * P_update * Hti_post' + R); 
+
+    % Y postfit 
+    Y_postfit(1:2) = Yi(1:2); 
+    y              = fn.G_fn(Xstar, XSi)'; 
+    Y_postfit(3)   = y(1); 
+
+end
+
+function [Xstar, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_2(Yi, Xi, XSi, Ht_rr_fn, Pi_bar, R)
+
+    % Y prefit 
+    Y_prefit(1:2) = Yi(1:2); 
+    y             = fn.G_fn(Xi, XSi)'; 
+    Y_prefit(3)   = y(2); 
+
+    % Observation-state matrix 
+    Hti_pre = Ht_rr_fn(Xi(1), Xi(2), Xi(3), Xi(4), Xi(5), Xi(6), XSi(1), XSi(2), XSi(3), XSi(4), XSi(5), XSi(6)); 
+
+    % PREFIT Innovation (information) covariance 
+    L_pre = (Hti_pre * Pi_bar * Hti_pre' + R); 
+
+    % Gain matrix 
+    Ki = Pi_bar * Hti_pre' * inv( Hti_pre * Pi_bar * Hti_pre' + R ); 
+
+    % Obtain y difference (range only) 
+    yi = Yi(3:4)' - fn.G_fn(Xi, XSi); 
+    yi = yi(2); 
+
+    % Measurement and reference orbit update 
+    xhat    = Ki * yi; 
+    Xstar    = Xi + xhat; 
+    P_update = ( eye(nX) - Ki * Hti_pre ) * Pi_bar;
+
+    % Innovation (information) covariance 
+    L_post = (Hti_pre * P_update * Hti_pre' + R); 
+
+    % Y postfit 
+    Y_postfit(1:2) = Yi(1:2); 
+    y              = fn.G_fn(Xstar, XSi)'; 
+    Y_postfit(3)   = y(2); 
+
+end
+
+
 
 
 
