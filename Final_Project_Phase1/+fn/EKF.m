@@ -58,8 +58,8 @@ elseif DATA == 2
     [X_update, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_2(Yi, Xi, XSi, Ht_rr_fn, Ppre_bar, R); 
 else % DATA == 0 
     [X_update, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_0(Yi, Xi, XSi, Ht_fn, Ppre_bar, R); 
-%     [X_update, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_0_ltcorr(Yi, Xi, XSi, Ht_fn, Ppre_bar, R, ... 
-%         ti_X, t_prop, XSTM, options, Amat_fn, r_STA_ECEF); 
+%     [X_update, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_0_corr(Yi, Xi, XSi, Ht_fn, Ppre_bar, R, ... 
+%         ti_X, t_prop, XSTM, options, Amat_fn); 
     
 end
 
@@ -72,14 +72,18 @@ function XSi = rv_ECEFtoECI(JD_UTC, r_STA_ECEF, v_STA_ECEF)
 global wE 
 
     r_STA_ECI  = fn.ECEFtoECI(JD_UTC, r_STA_ECEF); 
-    a_ECEF     = v_STA_ECEF + cross([ 0 0 wE ]', r_STA_ECEF); 
-    v_STA_ECI  = fn.ECEFtoECI(JD_UTC, a_ECEF); % Technically wrong. Look in Vallado p. 228 
+    v_STA_ECI  = v_STA_ECEF + cross([ 0 0 wE ]', r_STA_ECEF); 
+    v_STA_ECI  = fn.ECEFtoECI(JD_UTC, v_STA_ECI); % Technically wrong. Look in Vallado p. 228 
     XSi        = [r_STA_ECI; v_STA_ECI]; 
+    
+%     a_STA_ECEF = [  ]; 
+%     a_STA_ECI  = a_STA_ECEF + cross([ 0 0 wE]', v_STA_ECEF); 
+%     a_STA_ECI  = fn.ECEFtoECI(JD_UTC, a_STA_ECI); 
 
 end
 
-function [X_update, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_0_ltcorr(Yi, Xi, XSi, Ht_fn, Ppre_bar, R, ... 
-    ti_X, t_prop, XSTM, options, Amat_fn, r_STA_ECEF)
+function [X_update, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_0_corr(Yi, Xi, XSi, Ht_fn, Ppre_bar, R, ... 
+    ti_X, t_prop, XSTM, options, Amat_fn)
     
     % Y prefit 
     Y_prefit(1:2) = Yi(1:2); 
@@ -104,22 +108,18 @@ function [X_update, Y_prefit, L_pre, L_post, Y_postfit, P_update] = DATA_0_ltcor
         XSTM_end = XSTM; 
     end
     nX = length(Xi); 
-    [t_XSTM_corr, XSTM_corr] = ode45(@(t, XSTM) fn.EOM_STM(t, XSTM, Amat_fn, nX), t_back, XSTM_end, options); 
-    Xi_corr   = XSTM_corr(end,1:nX)'; 
-
-    % get JD time 
-    JD_UTC = cspice_et2utc(t_XSTM_corr(end), 'J', 10); 
-    JD_UTC = str2num(extractAfter(JD_UTC, 'JD ')); 
-
-    % Convert station to ECI frame 
-    XSi_corr = rv_ECEFtoECI(JD_UTC, r_STA_ECEF, [0; 0; 0]); 
+    [~, XSTM_lt] = ode45(@(t, XSTM) fn.EOM_STM(t, XSTM, Amat_fn, nX), t_back, XSTM_end, options); 
+    Xi_lt        = XSTM_lt(end,1:nX)'; 
+    
+    % Aberration 
+    v_STA_ECEF = XSi(4:6); 
+    Xi_lt_abr  = Xi_lt + lt * v_STA_ECEF; 
 
     % Gain matrix 
-%     Ki = Pcorr_bar * Hti_corr' * inv( Hti_corr * Pcorr_bar * Hti_corr' + R ); 
     Ki = Ppre_bar * Hti_pre' * inv( Hti_pre * Ppre_bar * Hti_pre' + R ); 
 
     % Obtain y difference 
-    yi = Yi(3:4)' - fn.G_fn(Xi_corr, XSi); 
+    yi = Yi(3:4)' - fn.G_fn(Xi_lt, XSi); 
 
     % Measurement and reference orbit update 
     xhat     = Ki * yi; 
